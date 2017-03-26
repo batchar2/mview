@@ -1,8 +1,36 @@
 import ctypes
 
+from abc import ABCMeta, abstractmethod
 
 from  default_options import CHANEL_PACKET_BODY_SIZE
 
+
+
+class ChanelState(metaclass=ABCMeta):
+
+    _data = None
+    def __init__(self, data_buf):
+        self._data = data_buf
+
+    @abstractmethod
+    def __call__(self, callback):
+        pass
+
+    @property
+    def data(self):
+        return self._data
+
+
+class ChanelGetPublicKeyClientState(ChanelState):
+    
+    def __init__(self, data_buf):
+        super().__init__(data_buf)
+
+
+class ChanelSendPublicKeyServerState(ChanelState):
+    
+    def __init__(self, data_buf):
+        super().__init__(data_buf)
 
 
 class ChanelLevelPacket(ctypes.LittleEndianStructure):
