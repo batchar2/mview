@@ -107,6 +107,7 @@ class ClientProcess:
                     self._chanel_packet_creator.make_packet_chanel(data)
                     #self._read_client2send_nucleus()
                 elif fd == self._chanel2nucleus.socket:
-                    self._read_nucleus2send_client()
+                    pass
+                    #self._read_nucleus2send_client()
 
 

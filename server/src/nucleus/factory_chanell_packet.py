@@ -64,8 +64,8 @@ class ChanelPacketCreator:
             return None
 
         if packet is not None:
-            if op.MAGIC_NUMBER == packet.field.magic:
-                packet_type = packet.field.type
+            if op.MAGIC_NUMBER == packet.magic_number:
+                packet_type = packet.type
                 # Идентифицируем пакет
                 if packet_type in self._packets_creators:
                     factory = self._packets_creators[paket_type]['factory']
