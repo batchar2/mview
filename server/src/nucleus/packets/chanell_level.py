@@ -2,7 +2,7 @@ import ctypes
 
 from abc import ABCMeta, abstractmethod
 
-from  default_options import CHANEL_PACKET_BODY_SIZE
+from .default_options import CHANEL_PACKET_BODY_SIZE
 
 
 """
@@ -45,5 +45,5 @@ class ChanelLevelPacket(ctypes.LittleEndianStructure):
         # зарезервированное поле
         ('null', ctypes.c_uint32, 32)
         # ip-адрес клиента
-        ('body', ctypes.c_ubyte * CHANEL_PACKET_BODY_SIZE),
+        #('body', ctypes.c_ubyte * CHANEL_PACKET_BODY_SIZE),
     ]

@@ -4,8 +4,8 @@ import select
 import socket
 import logging
 
-
-
+from .packets import default_options as op
+from .factory_chanell_packet import PacketCreatorNormal, PacketCreatorQOS, ChanelPacketCreator
 
 
 class ChanelPipeClient2Nucleus:
@@ -18,7 +18,6 @@ class ChanelPipeClient2Nucleus:
         :param file_socket_name: путь до файла-сокета, через который клиент будет вести обмен данными с ядром.
         
         """
-
         logging.info(u'Создается канал для ядра')
 
         self._sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
@@ -38,6 +37,8 @@ class ClientProcess:
     _chanel2nucleus = None
     _tcp_socket = None
     _PACKET_MAX_SIZE = None
+    
+    _chanel_packet_creator = None
 
     def __init__(self, *, tcp_socket, file_chanel2nucleus, packet_max_size):
         """ Конструктор класса
@@ -51,6 +52,14 @@ class ClientProcess:
 
         self._chanel2nucleus = ChanelPipeClient2Nucleus(file_chanel2nucleus)
         self._tcp_socket = tcp_socket
+
+
+    def _init_action_chanell_packet(self):
+        """ Инициализация обработчиков пакетов канального уровня
+        """
+        self._chanel_packet_creator =  ChanelPacketCreator()
+        self._chanel_packet_creator.addAction(op.CHANEL_PACKET_TYPE_NORMAL, PacketCreatorNormal(), None)
+        self._chanel_packet_creator.addAction(op.CHANEL_PACKET_TYPE_NORMAL, PacketCreatorQOS(), None)
 
 
     def _read_nucleus2send_client(self):
