@@ -63,14 +63,17 @@ class ChanelPacketCreator:
             logging.error(str(e))
             return None
 
-        if op.MAGIC_NUMBER == packet.field.magic:
-            packet_type = packet.field.type
-            # Идентифицируем пакет
-            if packet_type in self._packets_creators:
-                factory = self._packets_creators[paket_type]['factory']
-                cmd = self._packets_creators[paket_type]['cmd']
-                # Вызываем обработчик и передаем ему "распарсеный" пакет
-                return cmd(factory.factory_method(data))
+        if packet is not None:
+            if op.MAGIC_NUMBER == packet.field.magic:
+                packet_type = packet.field.type
+                # Идентифицируем пакет
+                if packet_type in self._packets_creators:
+                    factory = self._packets_creators[paket_type]['factory']
+                    cmd = self._packets_creators[paket_type]['cmd']
+                    # Вызываем обработчик и передаем ему "распарсеный" пакет
+                    return cmd(factory.factory_method(data))
+            else:
+                logging.error('Пакет не имеет магического числа!')
         else:
-            logging.error('Пакет не имеет магического числа!')
+             logging.error('Пакет не распарсился')
         return None
