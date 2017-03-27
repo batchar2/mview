@@ -5,6 +5,9 @@ import socket
 import logging
 
 
+
+
+
 class ChanelPipeClient2Nucleus:
     """ Канал связи от клиенского процесса до ядра системы """
     
@@ -15,7 +18,6 @@ class ChanelPipeClient2Nucleus:
         :param file_socket_name: путь до файла-сокета, через который клиент будет вести обмен данными с ядром.
         
         """
-        
 
         logging.info(u'Создается канал для ядра')
 

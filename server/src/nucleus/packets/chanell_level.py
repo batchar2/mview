@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractmethod
 from  default_options import CHANEL_PACKET_BODY_SIZE
 
 
-
+"""
 class ChanelState(metaclass=ABCMeta):
 
     _data = None
@@ -32,6 +32,7 @@ class ChanelSendPublicKeyServerState(ChanelState):
     def __init__(self, data_buf):
         super().__init__(data_buf)
 
+"""
 
 class ChanelLevelPacket(ctypes.LittleEndianStructure):
     """ Структура пакета канального уровня """
