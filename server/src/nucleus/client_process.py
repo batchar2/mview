@@ -6,6 +6,7 @@ import logging
 
 from .packets import default_options as op
 from .factory_chanell_packet import PacketCreatorNormal, PacketCreatorQOS, ChanelPacketCreator
+from .chanell_actions import ActionTypeNormal, ActionTypeQOS
 
 
 class ChanelPipeClient2Nucleus:
@@ -21,13 +22,11 @@ class ChanelPipeClient2Nucleus:
         logging.info(u'Создается канал для ядра')
 
         self._sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
-        self._sock.connect(file_socket_name)
-        
+        self._sock.connect(file_socket_name)        
 
     @property
     def socket(self):
         return self._sock
-
 
 
 
@@ -52,14 +51,17 @@ class ClientProcess:
 
         self._chanel2nucleus = ChanelPipeClient2Nucleus(file_chanel2nucleus)
         self._tcp_socket = tcp_socket
+        self._init_action_chanell_packet()
 
 
     def _init_action_chanell_packet(self):
         """ Инициализация обработчиков пакетов канального уровня
         """
         self._chanel_packet_creator =  ChanelPacketCreator()
-        self._chanel_packet_creator.addAction(op.CHANEL_PACKET_TYPE_NORMAL, PacketCreatorNormal(), None)
-        self._chanel_packet_creator.addAction(op.CHANEL_PACKET_TYPE_NORMAL, PacketCreatorQOS(), None)
+        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_NORMAL, 
+                concrete_factory=PacketCreatorNormal(), cmd=ActionTypeNormal(related_object=self))
+        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_QOS,
+                concrete_factory=PacketCreatorQOS(), cmd=ActionTypeQOS(related_object=self))
 
 
     def _read_nucleus2send_client(self):
@@ -87,7 +89,6 @@ class ClientProcess:
         """
         data = fd_read.recv(self._PACKET_MAX_SIZE)
         fd_write.send(data)
-
         return True
 
 
@@ -102,7 +103,9 @@ class ClientProcess:
             fd_reads, _, e = select.select(rfds, [], [])
             for fd in rfds:
                 if fd == self._tcp_socket:
-                    self._read_client2send_nucleus()
+                    data = fd.recv(self._PACKET_MAX_SIZE)
+                    self._chanel_packet_creator.make_packet_chanel(data)
+                    #self._read_client2send_nucleus()
                 elif fd == self._chanel2nucleus.socket:
                     self._read_nucleus2send_client()
 

@@ -1,3 +1,5 @@
+import logging
+
 from abc import ABC, abstractmethod
 
 
@@ -37,9 +39,9 @@ class PacketCreatorQOS(PacketCreator):
 class ChanelPacketCreator:
     """  Интерфейс, определяющий конструирование пакетов. Работа производится через него. Некий фасад  """
     
-    packets_creators = {}
+    _packets_creators = {}
     
-    def addAction(self, packet_type, concrete_factory, cmd):
+    def addAction(self, *, packet_type, concrete_factory, cmd):
         """ Сопоставляем тип пакета, "построитель пакета" и обработчик информации
         :param packet_type: тип, пакета
         :param concrete_factory: фабричный метод, ответственный за пакет
@@ -55,7 +57,11 @@ class ChanelPacketCreator:
         """ По данным полученым из сети строится соответствующий сетевой пакет 
         :param data: данные, полученые по сети
         """
-        packet = ChanelLevelPacket.from_buffer_copy(data)
+        try:
+            packet = ChanelLevelPacket.from_buffer_copy(data)
+        except Exception as e:
+            logging.error(str(e))
+            return None
 
         if op.MAGIC_NUMBER == packet.field.magic:
             packet_type = packet.field.type
@@ -65,4 +71,6 @@ class ChanelPacketCreator:
                 cmd = self._packets_creators[paket_type]['cmd']
                 # Вызываем обработчик и передаем ему "распарсеный" пакет
                 return cmd(factory.factory_method(data))
+        else:
+            logging.error('Пакет не имеет магического числа!')
         return None
