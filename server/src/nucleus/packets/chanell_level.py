@@ -22,7 +22,6 @@ class BaseChanelLevelPacket(ctypes.LittleEndianStructure):
 
 class ChanelLevelPacket(ctypes.LittleEndianStructure):
     """ Структура пакета канального уровня. В него оборачиваются все остальные пакеты """
-    
     _fields_ = [
         # Магическое число, отличающее пакет от прочего мусора
         ('magic_number', ctypes.c_ushort),
@@ -39,7 +38,6 @@ class ChanelLevelPacketKeyAuth(ctypes.LittleEndianStructure):
     """ Структура пакета канального уровня. 
         Данный пакет необходим для авторизации (обмен ключами)
     """
-    
     _fields_ = [
         # Магическое число, отличающее пакет от прочего мусора
         ('magic_number', ctypes.c_ushort),
