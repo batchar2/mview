@@ -136,10 +136,11 @@ class ClientProcess:
         
 
     def auth_user(self, *, username, password):
-        """ Попытка авторизовать пользователя 
+        """ Попытка авторизовать пользователя. Возврат значение успешности и идентификатор сессии
         :ret True если успешно прошло, False - иначе
         """
-        return True
+        session_key = '123456789'
+        return True, session_key
 
     def __call__(self):
         """

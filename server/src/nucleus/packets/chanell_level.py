@@ -67,5 +67,6 @@ class ChanelLevelPacketUserAuth(ctypes.LittleEndianStructure):
         # размер данных
         ('length', ctypes.c_uint32, 32),
         # Тело сообщения (Логин и пароль в зашифрованом виде)
+        # требуется разделить на два поля - логи и пароль. Шифровать такие поля отдельно
         ('info', ctypes.c_ubyte * CHANEL_PACKET_AUTH_BODY_SIZE)
     ]

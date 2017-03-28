@@ -72,7 +72,7 @@ class Client:
 		print('-' * 10)
 		print('Жду подтверждения авторизации')
 		data = self._sock.recv(op.CHANEL_PACKET_SIZE)
-		packet = ch.ChanelLevelPacket.from_buffer_copy(data)
+		packet = ch.ChanelLevelPacketKeyAuth.from_buffer_copy(data)
 		if (packet.type == op.CHANEL_PACKET_TYPE_AUTORIZATION_SUCCESS):
 			print("УСПЕШНАЯ АВТОРИЗАЦИЯ")
 		else:

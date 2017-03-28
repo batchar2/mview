@@ -113,11 +113,13 @@ class ActionTypeClientAuth(Action):
         """ Получаю от клиента пакет.
             Расшифровываю симетричным ключем
             Отправляю ядру на верификацию
-            Жду ответа от ядра
+            Жду ответа от ядра о успешности авторизации и получаю ключ идентификатор сессии
             Отвечаю пользователю
         """
         data = self.related_object.decode_aes(data=packet.info)
-        is_auth = self.related_object.auth_user(username=None, password=None)
+        is_auth, session_key = self.related_object.auth_user(username=None, password=None)
+
+        # необходим зашифровать идентификатор сессии
 
         if is_auth:
             packet_type = op.CHANEL_PACKET_TYPE_AUTORIZATION_SUCCESS
@@ -125,7 +127,7 @@ class ActionTypeClientAuth(Action):
             packet_type = op.CHANEL_PACKET_TYPE_AUTORIZATION_FAIL
 
         # Отвечаю клиенту о статусе авторизации
-        ans_packet = chanel.ChanelLevelPacket()
+        ans_packet = chanel.ChanelLevelPacketKeyAuth()
         ans_packet.magic_number = op.MAGIC_NUMBER
         ans_packet.version = op.CHANEL_PACKET_VERSION
         ans_packet.type = packet_type
