@@ -1,3 +1,5 @@
+import logging
+
 from abc import ABC, abstractmethod
 
 class Action(ABC):
@@ -27,11 +29,21 @@ class ActionTypeNormal(Action):
         super(ActionTypeNormal, self).__init__(related_object=related_object)
 
     def __call__(self, *, packet=None):
-        pass
+        logging.info('Обрабатываем данный пакет ActionTypeNormal. Хочу преобразовать в сетевой')
 
 
 class ActionTypeQOS(Action):
-    """  Обработка "нормального"" пакета """
+    """  Обработка "нормального" пакета """
+    def __init__(self, *, related_object=None):
+        super().__init__(related_object=related_object)
+
+    def __call__(self, *, packet=None):
+        pass
+
+
+
+class ActionTypeClientSendPublicKey(Action):
+    """  Обработка пакета с публичным ключем клиента """
     def __init__(self, *, related_object=None):
         super().__init__(related_object=related_object)
 

@@ -5,9 +5,12 @@ import select
 import socket
 import logging
 
+from . import factory_chanell_packet as ch_factory  
+from . import chanell_actions as ch_actions
+
 from .packets import default_options as op
-from .factory_chanell_packet import PacketCreatorNormal, PacketCreatorQOS, ChanelPacketCreator
-from .chanell_actions import ActionTypeNormal, ActionTypeQOS
+#from .factory_chanell_packet import PacketCreatorNormal, PacketCreatorQOS, ChanelPacketCreator
+#from .chanell_actions import ActionTypeNormal, ActionTypeQOS
 
 
 class ChanelPipeClient2Nucleus:
@@ -20,7 +23,7 @@ class ChanelPipeClient2Nucleus:
         :param file_socket_name: путь до файла-сокета, через который клиент будет вести обмен данными с ядром.
         
         """
-        logging.info(u'Создается канал для ядра')
+        logging.info('Создается канал для ядра')
 
         self._sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
         self._sock.connect(file_socket_name)        
@@ -57,13 +60,23 @@ class ClientProcess:
 
     def _init_action_chanell_packet(self):
         """ Инициализация обработчиков пакетов канального уровня
+            Через фабричный метод.
         """
-        self._chanel_packet_creator =  ChanelPacketCreator()
+        self._chanel_packet_creator = ch_factory.ChanelPacketCreator()
+        
+        # нормальный тип пакета
         self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_NORMAL, 
-                concrete_factory=PacketCreatorNormal(), cmd=ActionTypeNormal(related_object=self))
+                concrete_factory=ch_factory.PacketCreatorNormal(), 
+                cmd=ch_actions.ActionTypeNormal(related_object=self))
+        # пакет проверки качества соединения с сервером
         self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_QOS,
-                concrete_factory=PacketCreatorQOS(), cmd=ActionTypeQOS(related_object=self))
-
+                concrete_factory=ch_factory.PacketCreatorQOS(),
+                cmd=ch_actions.ActionTypeQOS(related_object=self))
+        # пакет с информацией о публичном ключе клиента
+        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE,
+                concrete_factory=ch_factory.PacketCreatorClientSendPublicKey(), 
+                cmd=ch_actions.ActionTypeClientSendPublicKey(related_object=self))
+        
 
     def _read_nucleus2send_client(self):
         #logging.info(u'Принял данные от ядра {0}. Отправляю клиенту'.format(os.getpid()))
@@ -79,22 +92,9 @@ class ClientProcess:
         if data is not None:
             self._chanel2nucleus.socket.send(data)
 
-
-    def _move_data(self, fd_read, fd_write):
-        """ Перемещает данные из одного файлового дескиптора в другой
-        :param fd_read: источник данных
-        :param fd_write: приемник данных
-
-        :rtype: bool
-        :return: True при удачном завершении 
-        """
-        data = fd_read.recv(self._PACKET_MAX_SIZE)
-        fd_write.send(data)
-        return True
-
-
     def __call__(self):
-        """ Выполняет чтение данных с каналов, декодирование и пересылка ядру системы
+        """
+        Выполняет чтение данных с каналов, декодирование и пересылка ядру системы
         """
         while True:
             # Формирую список дескрипторов, для опроса данных с них

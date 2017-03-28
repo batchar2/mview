@@ -5,8 +5,10 @@
 MAGIC_NUMBER = 32189
 
 # Размер тела сообщения канального уровня
-CHANEL_PACKET_BODY_SIZE = 1352
+CHANEL_PACKET_BODY_SIZE = 1292
 
+# Размер пакет, необходимого для авторизации.
+CHANEL_PACKET_AUTH_BODY_SIZE = 60
 
 # Обмен между клиентом и клиентом. Вставляется во все сообщения,
 CHANEL_PACKET_TYPE_NORMAL = 1
@@ -14,19 +16,19 @@ CHANEL_PACKET_TYPE_NORMAL = 1
 CHANEL_PACKET_TYPE_QOS = 2
 
 
-# Пользователь подключился и запросил открытый ключ сервера, в ответ выслал свой открытый ключ (клиент --> сервер)
-NETWORK_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE = 21
+# Пользователь подключился и отправил серверу свой открытый ключ (клиент --> сервер)
+CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE = 3
 # В ответ сервер высылает свой открытый ключ (сервер --> клиент)
-NETWORK_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE = 22
+CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE = 4
 # клиент высылает свой закрытый ключ серверу (клиент --> сервер)
-NETWORK_PACKET_TYPE_PRIVATE_KEY_EXCHANGE = 23
+CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE = 5
 # сервер подтверждает получение ключа (сервер --> клиент)
-NETWORK_PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS = 24
+CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS = 6
 # клиент пересылает свой логин и пароль для проведения авторизации (клиент --> сервер)
-NETWORK_PACKET_TYPE_AUTORIZATION = 25
+CHANEL_PACKET_TYPE_AUTORIZATION = 7
 # Успешное завершение авторизации (сервер --> клиент)
-NETWORK_PACKET_TYPE_AUTORIZATION_SUCCESS = 26
+CHANEL_PACKET_TYPE_AUTORIZATION_SUCCESS = 8
 # Авторизация провалилась, ответ (сервер --> клиент)
-NETWORK_PACKET_TYPE_AUTORIZATION_FAIL = 27
+CHANEL_PACKET_TYPE_AUTORIZATION_FAIL = 9
 
 

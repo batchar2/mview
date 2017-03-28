@@ -18,7 +18,8 @@ class Client:
 		
 	def __call__(self):
 		packet = ch.ChanelLevelPacket()
-		packet.magic = op.MAGIC_NUMBER
+		packet.magic_number = op.MAGIC_NUMBER
+		packet.type = op.CHANEL_PACKET_TYPE_NORMAL
 		
 		print("Data size={0}".format( ctypes.sizeof(packet)))
 		self._sock.send(packet)

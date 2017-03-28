@@ -1,9 +1,10 @@
+import ctypes
 import logging
 
 from abc import ABC, abstractmethod
 
 
-from .packets.chanell_level import ChanelLevelPacket
+from .packets.chanell_level import (ChanelLevelPacket, BaseChanelLevelPacket, ChanelLevelPacketKeyAuth, ChanelLevelPacketUserAuth)
 from .packets import default_options as op
 
 """
@@ -26,7 +27,24 @@ class PacketCreatorNormal(PacketCreator):
     """  Создатель "нормального пакета" """
     
     def factory_method(self, data):
+        logging.error('Пакет определен как CHANEL_PACKET_TYPE_NORMAL')
         return ChanelLevelPacket.from_buffer_copy(data)
+
+
+class PacketCreatorClientSendPublicKey(PacketCreator):
+    """  Клиент подключается и высылает свой публичный ключ """
+    
+    def factory_method(self, data):
+        logging.error('Пакет определен как CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE')
+        return ChanelLevelPacketKeyAuth.from_buffer_copy(data)
+
+
+class PacketCreatorServerSendPublicKey(PacketCreator):
+    """  В ответ сервер высылает свой публичный ключ  """
+    
+    def factory_method(self, data):
+        logging.error('Пакет определен как CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE')
+        return ChanelLevelPacketKeyAuth.from_buffer_copy(data)
 
 
 class PacketCreatorQOS(PacketCreator):
@@ -58,20 +76,23 @@ class ChanelPacketCreator:
         :param data: данные, полученые по сети
         """
         try:
-            packet = ChanelLevelPacket.from_buffer_copy(data)
+            # выполняем преобразование данных в пакет БАЗОВОГО ФОРМАТА, для идентификации
+            packet = BaseChanelLevelPacket.from_buffer_copy(data)
         except Exception as e:
             logging.error(str(e))
             return None
 
         if packet is not None:
+            logging.error('Получен пакет размера: {0} байт'.format(ctypes.sizeof(packet)))
             if op.MAGIC_NUMBER == packet.magic_number:
-                packet_type = packet.type
                 # Идентифицируем пакет
-                if packet_type in self._packets_creators:
-                    factory = self._packets_creators[paket_type]['factory']
-                    cmd = self._packets_creators[paket_type]['cmd']
+                if packet.type in self._packets_creators:
+                    factory = self._packets_creators[packet.type]['factory']
+                    cmd = self._packets_creators[packet.type]['cmd']
                     # Вызываем обработчик и передаем ему "распарсеный" пакет
-                    return cmd(factory.factory_method(data))
+                    return cmd(packet=factory.factory_method(data))
+                else:
+                    logging.error('Пакет неизвестного типа!')
             else:
                 logging.error('Пакет не имеет магического числа!')
         else:
