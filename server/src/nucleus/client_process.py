@@ -1,4 +1,5 @@
 import os
+import sys
 import uuid
 import select
 import socket
@@ -104,7 +105,12 @@ class ClientProcess:
             for fd in rfds:
                 if fd == self._tcp_socket:
                     data = fd.recv(self._PACKET_MAX_SIZE)
-                    self._chanel_packet_creator.make_packet_chanel(data)
+                    if data:
+                        self._chanel_packet_creator.make_packet_chanel(data)
+                    else:
+                        logging.info(u'Клиент отключился')
+                        fd.close()
+                        sys.exit(0)
                     #self._read_client2send_nucleus()
                 elif fd == self._chanel2nucleus.socket:
                     pass

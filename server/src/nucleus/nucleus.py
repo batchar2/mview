@@ -90,6 +90,7 @@ class Nucleus:
                     """ Подключение клиентского процесса к ядру системы """
                     self._create_chanel_client2nucleus(unix_socket=fd)
                 else:
+
                     """ Обмен даннымим между клиенскими процессами """
                     self._read_unix_client_data(unix_client_socket=fd)
             
@@ -117,19 +118,30 @@ class Nucleus:
         """ Создается канал связи клиенский процесс-ядро системы """
         conn, addr = unix_socket.accept()
         self._clients_unix.append(conn)
-        logging.info(u'Было подключено клиенское приложение {0} {0}'.format(conn, addr))
+        #logging.info(u'Было подключено клиенское приложение {0} {0}'.format(conn, addr))
+        logging.info('Было подключено клиенское приложение')
 
 
     def _read_unix_client_data(self, *, unix_client_socket):
 
-        logging.info(u'Ядро <-- Клиент {0}'.format(unix_client_socket))
+        #logging.info(u'Ядро <-- Клиент {0}'.format(unix_client_socket))
+        logging.info('Ядро <-- Клиент')
 
         data = unix_client_socket.recv(self._PACKET_MAX_SIZE)
 
-        for fd in self._clients_unix:
-            logging.info(u'Ядро --> Клиент {0}'.format(fd))
-            fd.send(data)
-
+        if data:
+            for fd in self._clients_unix:
+                logging.info(u'Ядро --> Клиент {0}'.format(fd))
+                fd.send(data)
+        else:
+            logging.info('Клиенский процесс отключился')
+            unix_client_socket.close()
+            # Костыльчик, УБРАТЬ!!!!
+            sockets = []
+            for fd in self._clients_unix:
+                if fd != unix_client_socket:
+                    sockets.append(fd)
+            self._clients_unix = sockets
 
     def __del__(self):
         pass
