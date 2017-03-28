@@ -4,8 +4,8 @@ import logging
 from abc import ABC, abstractmethod
 
 
-from .packets.chanell_level import (ChanelLevelPacket, BaseChanelLevelPacket, ChanelLevelPacketKeyAuth, ChanelLevelPacketUserAuth)
-from .packets import default_options as op
+from .netpackets.chanell_level import (ChanelLevelPacket, BaseChanelLevelPacket, ChanelLevelPacketKeyAuth, ChanelLevelPacketUserAuth)
+from .netpackets import default_options as op
 
 """
 Реализуется паттерн "Фабричный метод", для идентификации принятых пакетов.

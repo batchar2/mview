@@ -6,8 +6,8 @@ import socket
 
 from io import BytesIO
 
-from nucleus.packets import chanell_level as ch
-from nucleus.packets import default_options as op
+from nucleus.netpackets import chanell_level as ch
+from nucleus.netpackets import default_options as op
 
 class Client:
 

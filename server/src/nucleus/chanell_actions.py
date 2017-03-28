@@ -3,9 +3,9 @@ import logging
 
 from abc import ABC, abstractmethod
 
-from .packets import default_options as op 
+from .netpackets import default_options as op 
 
-from .packets import chanell_level as chanel
+from .netpackets import chanell_level as chanel
 
 class Action(ABC):
     """ Класс "команда", реализует вызов функции. Используется для связи с клиентом """

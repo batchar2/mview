@@ -8,7 +8,7 @@ import logging
 from . import factory_chanell_packet as ch_factory  
 from . import chanell_actions as ch_actions
 
-from .packets import default_options as op
+from .netpackets import default_options as op
 #from .factory_chanell_packet import PacketCreatorNormal, PacketCreatorQOS, ChanelPacketCreator
 #from .chanell_actions import ActionTypeNormal, ActionTypeQOS
 
