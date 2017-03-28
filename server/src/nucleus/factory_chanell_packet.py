@@ -27,7 +27,7 @@ class PacketCreatorNormal(PacketCreator):
     """  Создатель "нормального пакета" """
     
     def factory_method(self, data):
-        logging.error('Пакет определен как CHANEL_PACKET_TYPE_NORMAL')
+        logging.info('Пакет определен как CHANEL_PACKET_TYPE_NORMAL')
         return ChanelLevelPacket.from_buffer_copy(data)
 
 
@@ -35,7 +35,7 @@ class PacketCreatorClientSendPublicKey(PacketCreator):
     """  Клиент подключается и высылает свой публичный ключ """
     
     def factory_method(self, data):
-        logging.error('Пакет определен как CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE')
+        logging.info('Пакет определен как CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE')
         return ChanelLevelPacketKeyAuth.from_buffer_copy(data)
 
 
@@ -43,9 +43,25 @@ class PacketCreatorServerSendPublicKey(PacketCreator):
     """  В ответ сервер высылает свой публичный ключ  """
     
     def factory_method(self, data):
-        logging.error('Пакет определен как CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE')
+        logging.info('Пакет определен как CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE')
         return ChanelLevelPacketKeyAuth.from_buffer_copy(data)
 
+
+class PacketCreatorClientSendPrivateSimmetricKey(PacketCreator):
+    """ Клиент высылает свой закрытый симметричный ключ """
+
+    def factory_method(self, data):
+        logging.info('Получен запрос на принятие закрытого ключа CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE')
+        return ChanelLevelPacketKeyAuth.from_buffer_copy(data)
+
+
+
+class PacketCreatorClientAuth(PacketCreator):
+    """ Клиент высылает свой логин и пароль """
+    def factory_method(self, data):
+        logging.info('Получен логин и пароль клиента CHANEL_PACKET_TYPE_AUTORIZATION')
+        return ChanelLevelPacketUserAuth.from_buffer_copy(data)
+        
 
 class PacketCreatorQOS(PacketCreator):
     """ Создатель пакета QOS  """
@@ -83,7 +99,7 @@ class ChanelPacketCreator:
             return None
 
         if packet is not None:
-            logging.error('Получен пакет размера: {0} байт'.format(ctypes.sizeof(packet)))
+            logging.info('Получен пакет размера: {0} байт'.format(ctypes.sizeof(packet)))
             if op.MAGIC_NUMBER == packet.magic_number:
                 # Идентифицируем пакет
                 if packet.type in self._packets_creators:

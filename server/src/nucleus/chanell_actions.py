@@ -76,3 +76,58 @@ class ActionTypeClientSendPublicKey(Action):
         ans_packet.length = len(public_key)
 
         self.related_object.send_user(packet=ans_packet)
+
+
+
+class ActionTypeClientSendPrivateKey(Action):
+    """  Обработка пакета с закрытым симетричным ключем клиента. Зашифрован открытым ключем сервера """
+    def __init__(self, *, related_object=None):
+        super().__init__(related_object=related_object)
+
+
+    def __call__(self, *, packet=None):
+        """ Получаю от клиента пакет.
+            Расшифровываю своим закрытым ключем
+            Сохраняю секретный симетричный ключ клиента
+        """
+        data = self.related_object.decode_rsa_data(data=packet.key)
+        self.related_object.set_client_aes_key(key=packet.key)
+
+        # Отвечаю клиенту на принятие данных
+        ans_packet = chanel.ChanelLevelPacketKeyAuth()
+        ans_packet.magic_number = op.MAGIC_NUMBER
+        ans_packet.version = op.CHANEL_PACKET_VERSION
+        ans_packet.type = op.CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS
+
+        self.related_object.send_user(packet=ans_packet)
+
+
+class ActionTypeClientAuth(Action):
+    """ Принятие логина и пароля от пользователя.
+        Зашифрованы симетричным ключем
+    """
+    def __init__(self, *, related_object=None):
+        super().__init__(related_object=related_object)
+
+    def __call__(self, *, packet=None):
+        """ Получаю от клиента пакет.
+            Расшифровываю симетричным ключем
+            Отправляю ядру на верификацию
+            Жду ответа от ядра
+            Отвечаю пользователю
+        """
+        data = self.related_object.decode_aes(data=packet.info)
+        is_auth = self.related_object.auth_user(username=None, password=None)
+
+        if is_auth:
+            packet_type = op.CHANEL_PACKET_TYPE_AUTORIZATION_SUCCESS
+        else:
+            packet_type = op.CHANEL_PACKET_TYPE_AUTORIZATION_FAIL
+
+        # Отвечаю клиенту о статусе авторизации
+        ans_packet = chanel.ChanelLevelPacket()
+        ans_packet.magic_number = op.MAGIC_NUMBER
+        ans_packet.version = op.CHANEL_PACKET_VERSION
+        ans_packet.type = packet_type
+
+        self.related_object.send_user(packet=ans_packet)

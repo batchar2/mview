@@ -76,6 +76,14 @@ class ClientProcess:
         self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE,
                 concrete_factory=ch_factory.PacketCreatorClientSendPublicKey(), 
                 cmd=ch_actions.ActionTypeClientSendPublicKey(related_object=self))
+        # пакет с закрытым-симметричный ключем клиента
+        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE,
+                concrete_factory=ch_factory.PacketCreatorClientSendPrivateSimmetricKey(),
+                cmd=ch_actions.ActionTypeClientSendPrivateKey(related_object=self))
+        # пакет с идентификатором пользователя (логин и пароль)
+        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_AUTORIZATION,
+                concrete_factory=ch_factory.PacketCreatorClientAuth(),
+                cmd=ch_actions.ActionTypeClientAuth(related_object=self))
         
 
     def _read_nucleus2send_client(self):
@@ -112,7 +120,26 @@ class ClientProcess:
     def send_user(self, *, packet):
         """ Отправка пользователю пакета данных """
         self._tcp_socket.send(packet)
+
+
+    def decode_rsa_data(self, *, data):
+        """ Расшифровать данные от клиента """
+        pass
+
+
+    def set_client_aes_key(self, *, key):
+        """ Сохранить секретный-симетричный ключ клиента """
+        pass
+    
+    def decode_aes(self, *, data):
+        """ Расшифровать информацию полученную от пользователя """
         
+
+    def auth_user(self, *, username, password):
+        """ Попытка авторизовать пользователя 
+        :ret True если успешно прошло, False - иначе
+        """
+        return True
 
     def __call__(self):
         """
@@ -126,7 +153,7 @@ class ClientProcess:
             fd_reads, _, e = select.select(rfds, [], [])
             for fd in rfds:
                 if fd == self._tcp_socket:
-                    data = fd.recv(self._PACKET_MAX_SIZE)
+                    data = fd.recv(op.CHANEL_PACKET_SIZE)
                     if data:
                         self._chanel_packet_creator.make_packet_chanel(data)
                     else:
