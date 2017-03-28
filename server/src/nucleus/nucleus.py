@@ -4,7 +4,7 @@ import select
 import socket
 import logging
 
-from .client_process import ClientProcess
+from .nuclient import NuClient
 
 
 class Nucleus:
@@ -104,7 +104,7 @@ class Nucleus:
 
         pid = os.fork()
         if pid == 0:
-            client = ClientProcess(tcp_socket=client_socket, 
+            client = NuClient(tcp_socket=client_socket, 
                                     file_chanel2nucleus=self._unix_file_socket_path,
                                     packet_max_size=self._PACKET_MAX_SIZE)
 

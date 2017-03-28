@@ -34,7 +34,7 @@ class ChanelPipeClient2Nucleus:
 
 
 
-class ClientProcess:
+class NuClient:
     """Класс отвечающий за взаимодействие с удаленным клиентом."""
 
     _chanel2nucleus = None
