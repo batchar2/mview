@@ -1,6 +1,11 @@
+import ctypes
 import logging
 
 from abc import ABC, abstractmethod
+
+from .packets import default_options as op 
+
+from .packets import chanell_level as chanel
 
 class Action(ABC):
     """ Класс "команда", реализует вызов функции. Используется для связи с клиентом """
@@ -20,6 +25,11 @@ class Action(ABC):
         :param packet: тело пакета    
         """
         pass
+
+
+    @property
+    def related_object(self):
+        return self._related_object
 
 
 
@@ -48,4 +58,21 @@ class ActionTypeClientSendPublicKey(Action):
         super().__init__(related_object=related_object)
 
     def __call__(self, *, packet=None):
-        pass
+        """ Получаю от клиента открытый ключ, и генерирую свой """
+
+        self.related_object.set_client_public_key(key=packet.key)
+        self.related_object.generate_rsa_keys()
+        
+        public_key = self.related_object.get_public_key()
+
+        # строку в массив байт
+        str2cubytes = lambda s, size: ctypes.cast(s, ctypes.POINTER(ctypes.c_ubyte * size))[0]
+
+        ans_packet = chanel.ChanelLevelPacketKeyAuth()
+        ans_packet.magic_number = op.MAGIC_NUMBER
+        ans_packet.version = op.CHANEL_PACKET_VERSION
+        ans_packet.type = op.CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE
+        ans_packet.key = str2cubytes(public_key, op.CHANEL_PACKET_AUTH_BODY_SIZE) #str2cubytes(public_key, op.CHANEL_PACKET_AUTH_BODY_SIZE)
+        ans_packet.length = len(public_key)
+
+        self.related_object.send_user(packet=ans_packet)

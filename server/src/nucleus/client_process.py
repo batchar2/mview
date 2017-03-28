@@ -92,6 +92,28 @@ class ClientProcess:
         if data is not None:
             self._chanel2nucleus.socket.send(data)
 
+    
+    def set_client_public_key(self, *, key):
+        """ Сохраняет публичный ключ клиента 
+        :param key: публичный ключ
+        """
+        pass
+
+
+    def generate_rsa_keys(self):
+        """ Генерирует ключи """
+
+
+    def get_public_key(self):
+        """ Получает публичный ключ """
+        return "123456790"
+
+
+    def send_user(self, *, packet):
+        """ Отправка пользователю пакета данных """
+        self._tcp_socket.send(packet)
+        
+
     def __call__(self):
         """
         Выполняет чтение данных с каналов, декодирование и пересылка ядру системы

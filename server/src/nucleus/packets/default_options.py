@@ -3,7 +3,7 @@
 
 # магичесоке число для верификации и отличия от муссора
 MAGIC_NUMBER = 32189
-
+CHANEL_PACKET_VERSION = 1
 # Размер тела сообщения канального уровня
 CHANEL_PACKET_BODY_SIZE = 1292
 
@@ -20,7 +20,7 @@ CHANEL_PACKET_TYPE_QOS = 2
 CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE = 3
 # В ответ сервер высылает свой открытый ключ (сервер --> клиент)
 CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE = 4
-# клиент высылает свой закрытый ключ серверу (клиент --> сервер)
+# клиент высылает свой закрытый-симметричный ключ серверу. Зашифровано открытым ключем сервера (клиент --> сервер)
 CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE = 5
 # сервер подтверждает получение ключа (сервер --> клиент)
 CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS = 6
