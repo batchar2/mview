@@ -4,8 +4,10 @@ import logging
 from abc import ABC, abstractmethod
 
 
-from .netpackets.chanell_level import (ChanelLevelPacket, BaseChanelLevelPacket, ChanelLevelPacketKeyAuth, ChanelLevelPacketUserAuth)
-from .netpackets import default_options as op
+from .netpackets.chanel import (ChanelLevelPacket, BaseChanelLevelPacket, ChanelLevelPacketKeyAuth, ChanelLevelPacketUserAuth)
+from .netpackets import options as op
+
+from nucleus import options as base_options
 
 """
 Реализуется паттерн "Фабричный метод", для идентификации принятых пакетов.
@@ -100,7 +102,7 @@ class ChanelPacketCreator:
 
         if packet is not None:
             logging.info('Получен пакет размера: {0} байт'.format(ctypes.sizeof(packet)))
-            if op.MAGIC_NUMBER == packet.magic_number:
+            if base_options.MAGIC_NUMBER == packet.magic_number:
                 # Идентифицируем пакет
                 if packet.type in self._packets_creators:
                     factory = self._packets_creators[packet.type]['factory']

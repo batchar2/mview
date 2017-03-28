@@ -2,8 +2,9 @@ import ctypes
 
 from abc import ABCMeta, abstractmethod
 
-from .default_options import CHANEL_PACKET_BODY_SIZE, CHANEL_PACKET_AUTH_BODY_SIZE
+from .options import CHANEL_PACKET_BODY_SIZE, CHANEL_PACKET_AUTH_BODY_SIZE
 
+from .. import options
 
 class BaseChanelLevelPacket(ctypes.LittleEndianStructure):
     """ Структура пакета канального уровня. 
@@ -65,8 +66,9 @@ class ChanelLevelPacketUserAuth(ctypes.LittleEndianStructure):
         # зарезервированное поле
         ('null', ctypes.c_uint32, 32),
         # размер данных
-        ('length', ctypes.c_uint32, 32),
+        ('length_username', ctypes.c_ushort),
+        ('length_password', ctypes.c_ushort),
         # Тело сообщения (Логин и пароль в зашифрованом виде)
-        # требуется разделить на два поля - логи и пароль. Шифровать такие поля отдельно
-        ('info', ctypes.c_ubyte * CHANEL_PACKET_AUTH_BODY_SIZE)
+        ('username', ctypes.c_ubyte * options.LOGIN_SIZE),
+        ('password', ctypes.c_ubyte * options.PASSWORD_SIZE),
     ]

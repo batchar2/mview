@@ -6,6 +6,7 @@ import logging
 
 from .nuclient import NuClient
 
+from . import nucpackets
 
 class Nucleus:
     """ Ядро системы, выполняет маршрутизацию сообщений между клиентами, 

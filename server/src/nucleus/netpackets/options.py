@@ -2,7 +2,6 @@
 
 
 # магичесоке число для верификации и отличия от муссора
-MAGIC_NUMBER = 32189
 CHANEL_PACKET_VERSION = 1
 # Размер тела сообщения канального уровня
 CHANEL_PACKET_BODY_SIZE = 1292

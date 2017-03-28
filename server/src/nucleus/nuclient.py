@@ -5,13 +5,20 @@ import select
 import socket
 import logging
 
+
+
+
 from . import factory_chanell_packet as ch_factory  
 from . import chanell_actions as ch_actions
 
-from .netpackets import default_options as op
-#from .factory_chanell_packet import PacketCreatorNormal, PacketCreatorQOS, ChanelPacketCreator
-#from .chanell_actions import ActionTypeNormal, ActionTypeQOS
+from .netpackets import options as op
 
+
+from . import options 
+
+"""
+Клиент ядра системы. Отвечает за связь с удаленным клиентом
+"""
 
 class ChanelPipeClient2Nucleus:
     """ Канал связи от клиенского процесса до ядра системы """
@@ -131,16 +138,16 @@ class NuClient:
         """ Сохранить секретный-симетричный ключ клиента """
         pass
     
+
     def decode_aes(self, *, data):
         """ Расшифровать информацию полученную от пользователя """
-        
+        return data
 
-    def auth_user(self, *, username, password):
-        """ Попытка авторизовать пользователя. Возврат значение успешности и идентификатор сессии
-        :ret True если успешно прошло, False - иначе
-        """
-        session_key = '123456789'
-        return True, session_key
+
+    def request_nucleus(self, *, packet):
+        """ Запрос специально сформированым пакетом к ядру системы """
+        self._chanel2nucleus.socket.send(packet)
+        
 
     def __call__(self):
         """
