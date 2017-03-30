@@ -6,8 +6,8 @@ import socket
 
 from io import BytesIO
 
-from nucleus.netpackets import chanel as ch
-from nucleus.netpackets import options as op
+from nucleus.fchanel.netpackets import chanel as ch
+from nucleus.fchanel.netpackets import options as op
 
 from nucleus import options as base_options
 class Client:
@@ -39,7 +39,7 @@ class Client:
         packet = ch.ChanelLevelPacketKeyAuth.from_buffer_copy(data)
         print("magic_number={0}".format(packet.magic_number))
         print("length={0}".format(packet.length))
-        print("key={0}".format(packet.key))
+        #print("key={0}".format(packet.key))
 
         # Передача серверу зарытый ключ
         print('-' * 10)
@@ -59,7 +59,7 @@ class Client:
         print("ответ: {0} == {1}".format(packet.type, op.CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS))
         print("magic_number={0}".format(packet.magic_number))
         print("length={0}".format(packet.length))
-        print("key={0}".format(packet.key))
+        #print("key={0}".format(packet.key))
         
         # Отправляю свои данные - логин и пароль
         packet = ch.ChanelLevelPacketUserAuth()

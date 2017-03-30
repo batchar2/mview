@@ -6,10 +6,10 @@ from abc import ABC, abstractmethod
 from .netpackets import options as op 
 from .netpackets import chanel
 
-from .nucpackets import packets as nucpackets
-from .nucpackets import options as nop
+#from .nucpackets import packets as nucpackets
+#from .nucpackets import options as nop
 
-from . import options as bopt
+from .. import options as bopt
 
 class Action(ABC):
     """ Класс "команда", реализует вызов функции. Используется для связи с клиентом """
@@ -64,23 +64,26 @@ class ActionTypeClientSendPublicKey(Action):
     def __call__(self, *, packet=None):
         """ Получаю от клиента открытый ключ, и генерирую свой """
 
-        self.related_object.set_client_public_key(key=packet.key)
+        #self.related_object.set_client_public_key(key=packet.key)
         self.related_object.generate_rsa_keys()
         
         public_key = self.related_object.get_public_key()
 
+        
+
         # строку в массив байт
+        
         str2cubytes = lambda s, size: ctypes.cast(s, ctypes.POINTER(ctypes.c_ubyte * size))[0]
 
         ans_packet = chanel.ChanelLevelPacketKeyAuth()
         ans_packet.magic_number = bopt.MAGIC_NUMBER
         ans_packet.version = op.CHANEL_PACKET_VERSION
         ans_packet.type = op.CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE
-        ans_packet.key = str2cubytes(public_key, op.CHANEL_PACKET_AUTH_BODY_SIZE) #str2cubytes(public_key, op.CHANEL_PACKET_AUTH_BODY_SIZE)
+        #ans_packet.key = str2cubytes(public_key, op.CHANEL_PACKET_AUTH_BODY_SIZE) 
         ans_packet.length = len(public_key)
 
         self.related_object.send_user(packet=ans_packet)
-
+        
 
 
 class ActionTypeClientSendPrivateKey(Action):
@@ -94,8 +97,10 @@ class ActionTypeClientSendPrivateKey(Action):
             Расшифровываю своим закрытым ключем
             Сохраняю секретный симетричный ключ клиента
         """
-        data = self.related_object.decode_rsa_data(data=packet.key)
-        self.related_object.set_client_aes_key(key=packet.key)
+        #data = self.related_object.decode_rsa_data(data=packet.key)
+        #self.related_object.set_client_aes_key(key=packet.key)
+        data = self.related_object.decode_rsa_data(data=None)
+        self.related_object.set_client_aes_key(key=None)
 
         # Отвечаю клиенту на принятие данных
         ans_packet = chanel.ChanelLevelPacketKeyAuth()
@@ -122,10 +127,11 @@ class ActionTypeClientAuth(Action):
 
         logging.info('ПЫТАЮСЬ АВТОРИЗОВАТЬ ПОЛЬЗОВАТЕЛЯ')
         
-        username = self.related_object.decode_aes(data=packet.username)
-        password = self.related_object.decode_aes(data=packet.password)
+        username = None #self.related_object.decode_aes(data=packet.username)
+        password = None #self.related_object.decode_aes(data=packet.password)
 
-        # Формирую запрос на авторизацию клиента
+        # Перенаправляю запрос другому клиенту (ядра) !!!!
+        """ Тут не должно быть этого кода
         nuc_packet = nucpackets.NuPacketRequestAuth()
         nuc_packet.magic_number = bopt.MAGIC_NUMBER
 
@@ -137,24 +143,4 @@ class ActionTypeClientAuth(Action):
         
 
         """
-        # Ожидаю ответа от сервера
-        #return True, session_key
-
-
-        is_auth, session_key = self.related_object.auth_user(username=username, password=password)
-
-        # необходим зашифровать идентификатор сессии
-
-        if is_auth:
-            packet_type = op.CHANEL_PACKET_TYPE_AUTORIZATION_SUCCESS
-        else:
-            packet_type = op.CHANEL_PACKET_TYPE_AUTORIZATION_FAIL
-
-        # Отвечаю клиенту о статусе авторизации
-        ans_packet = chanel.ChanelLevelPacketKeyAuth()
-        ans_packet.magic_number = bopt.MAGIC_NUMBER
-        ans_packet.version = op.CHANEL_PACKET_VERSION
-        ans_packet.type = packet_type
-
-        self.related_object.send_user(packet=ans_packet)
-        """
+        

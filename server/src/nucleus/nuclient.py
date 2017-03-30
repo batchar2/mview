@@ -8,10 +8,12 @@ import logging
 
 
 
-from . import factory_chanell_packet as ch_factory  
-from . import chanell_actions as ch_actions
+from .fchanel import actions as ch_actions
+from .fchanel import factory as ch_factory
+#from . import factory_chanell_packet as ch_factory  
+#from . import chanell_actions as ch_actions
 
-from .netpackets import options as op
+from .fchanel.netpackets import options as op
 
 
 from . import options 

@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod
 
 from .options import CHANEL_PACKET_BODY_SIZE, CHANEL_PACKET_AUTH_BODY_SIZE
 
-from .. import options
+#from .. import options
 
 class BaseChanelLevelPacket(ctypes.LittleEndianStructure):
     """ Структура пакета канального уровня. 
@@ -31,8 +31,11 @@ class ChanelLevelPacket(ctypes.LittleEndianStructure):
         # зарезервированное поле
         ('null', ctypes.c_uint32, 32),
         # Тело сообщения
-        ('body', ctypes.c_ubyte * CHANEL_PACKET_BODY_SIZE)
+    #    ('body', ctypes.c_ubyte * CHANEL_PACKET_BODY_SIZE)
     ]
+
+    #def __init__(self, body_szie):
+    #    self.body
 
 
 class ChanelLevelPacketKeyAuth(ctypes.LittleEndianStructure):
@@ -49,7 +52,7 @@ class ChanelLevelPacketKeyAuth(ctypes.LittleEndianStructure):
         # размер данных
         ('length', ctypes.c_uint32, 32),
         # Тело сообщения (передаеся ключ)
-        ('key', ctypes.c_ubyte * CHANEL_PACKET_AUTH_BODY_SIZE)
+    #    ('key', ctypes.c_ubyte * CHANEL_PACKET_AUTH_BODY_SIZE)
     ]
 
 
@@ -69,6 +72,6 @@ class ChanelLevelPacketUserAuth(ctypes.LittleEndianStructure):
         ('length_username', ctypes.c_ushort),
         ('length_password', ctypes.c_ushort),
         # Тело сообщения (Логин и пароль в зашифрованом виде)
-        ('username', ctypes.c_ubyte * options.LOGIN_SIZE),
-        ('password', ctypes.c_ubyte * options.PASSWORD_SIZE),
+    #    ('username', ctypes.c_ubyte * options.LOGIN_SIZE),
+    #    ('password', ctypes.c_ubyte * options.PASSWORD_SIZE),
     ]
