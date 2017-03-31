@@ -3,15 +3,8 @@ import logging
 
 from abc import ABC, abstractmethod
 
-#from .netpackets import options as op 
 from .netpackets import chanel
 
-from ..settings import SETTINGS
-
-#from .nucpackets import packets as nucpackets
-#from .nucpackets import options as nop
-
-#from .. import options as bopt
 
 class Action(ABC):
     """ Класс "команда", реализует вызов функции. Используется для связи с клиентом """
@@ -66,21 +59,21 @@ class ActionTypeClientSendPublicKey(Action):
     def __call__(self, *, packet=None):
         """ Получаю от клиента открытый ключ, и генерирую свой """
 
-        #self.related_object.set_client_public_key(key=packet.key)
+        settings = self.related_object.settings['PROTOCOLS']
+        
+        """ self.related_object.set_client_public_key(key=packet.key) """
         self.related_object.generate_rsa_keys()
         
         public_key = self.related_object.get_public_key()
-
-        
 
         # строку в массив байт
         
         str2cubytes = lambda s, size: ctypes.cast(s, ctypes.POINTER(ctypes.c_ubyte * size))[0]
 
         ans_packet = chanel.ChanelLevelPacketKeyAuth()
-        ans_packet.magic_number = bopt.MAGIC_NUMBER
-        ans_packet.version = op.CHANEL_PACKET_VERSION
-        ans_packet.type = op.CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE
+        ans_packet.magic_number = settings['MAGIC_NUMBER']
+        ans_packet.version = settings['CHANEL']['PROTOCOL']['PACKET_VERSION']
+        ans_packet.type = settings['CHANEL']['PROTOCOL']['PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE']
         #ans_packet.key = str2cubytes(public_key, op.CHANEL_PACKET_AUTH_BODY_SIZE) 
         ans_packet.length = len(public_key)
 
@@ -99,6 +92,8 @@ class ActionTypeClientSendPrivateKey(Action):
             Расшифровываю своим закрытым ключем
             Сохраняю секретный симетричный ключ клиента
         """
+        settings = self.related_object.settings['PROTOCOLS']
+
         #data = self.related_object.decode_rsa_data(data=packet.key)
         #self.related_object.set_client_aes_key(key=packet.key)
         data = self.related_object.decode_rsa_data(data=None)
@@ -106,9 +101,9 @@ class ActionTypeClientSendPrivateKey(Action):
 
         # Отвечаю клиенту на принятие данных
         ans_packet = chanel.ChanelLevelPacketKeyAuth()
-        ans_packet.magic_number = bopt.MAGIC_NUMBER
-        ans_packet.version = op.CHANEL_PACKET_VERSION
-        ans_packet.type = op.CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS
+        ans_packet.magic_number = settings['MAGIC_NUMBER']
+        ans_packet.version = settings['CHANEL']['PROTOCOL']['PACKET_VERSION']
+        ans_packet.type = settings['CHANEL']['PROTOCOL']['PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS']
 
         self.related_object.send_user(packet=ans_packet)
 

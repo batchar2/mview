@@ -76,7 +76,10 @@ class ChanelPacketCreator:
     """  Интерфейс, определяющий конструирование пакетов. Работа производится через него. Некий фасад  """
     
     _packets_creators = {}
-    
+    _SETTINGS = None
+    def __init__(self, *, settings):
+        self._SETTINGS = settings
+
     def addAction(self, *, packet_type, concrete_factory, cmd):
         """ Сопоставляем тип пакета, "построитель пакета" и обработчик информации
         :param packet_type: тип, пакета
@@ -102,7 +105,7 @@ class ChanelPacketCreator:
 
         if packet is not None:
             logging.info('Получен пакет размера: {0} байт'.format(ctypes.sizeof(packet)))
-            if base_options.MAGIC_NUMBER == packet.magic_number:
+            if self._SETTINGS['PROTOCOLS']['MAGIC_NUMBER'] == packet.magic_number:
                 # Идентифицируем пакет
                 if packet.type in self._packets_creators:
                     factory = self._packets_creators[packet.type]['factory']

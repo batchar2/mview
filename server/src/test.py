@@ -6,8 +6,8 @@ import socket
 
 from io import BytesIO
 
-from nucleus.fchanel.netpackets import chanel as ch
-from nucleus.fchanel.netpackets import options as op
+from nucleus.nuclient.fchanel.netpackets import chanel as ch
+from nucleus.nuclient.fchanel.netpackets import options as op
 
 
 from nucleus.settings import SETTINGS
@@ -28,9 +28,9 @@ class Client:
         print('-' * 10)
         print('Передаем открытый ключ клиента')
         packet = ch.ChanelLevelPacketKeyAuth()
-        packet.magic_number = base_options.MAGIC_NUMBER
-        packet.type = op.CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE
-        packet.version = op.CHANEL_PACKET_VERSION
+        packet.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet.type = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE']
+        packet.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
         
         print("Data size={0}".format( ctypes.sizeof(packet)))
         self._sock.send(packet)
@@ -48,9 +48,9 @@ class Client:
         print('-' * 10)
         print('Передаем закрытый ключ для симетричного шифрования')
         packet = ch.ChanelLevelPacketKeyAuth()
-        packet.magic_number = base_options.MAGIC_NUMBER
-        packet.type = op.CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE
-        packet.version = op.CHANEL_PACKET_VERSION
+        packet.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet.type = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'] 
+        
         print("Data size={0}".format( ctypes.sizeof(packet)))
         self._sock.send(packet)
 
@@ -66,13 +66,13 @@ class Client:
         
         # Отправляю свои данные - логин и пароль
         packet = ch.ChanelLevelPacketUserAuth()
-        packet.magic_number = base_options.MAGIC_NUMBER
-        packet.type = op.CHANEL_PACKET_TYPE_AUTORIZATION
-        packet.version = op.CHANEL_PACKET_VERSION
+        packet.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet.type =  SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_AUTORIZATION']
+        packet.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
          # УБРАТЬ, сделано для тестов !!!!
         str2cubytes = lambda s, size: ctypes.cast(s, ctypes.POINTER(ctypes.c_ubyte * size))[0]
-        username = str2cubytes('username', base_options.LOGIN_SIZE)
-        password = str2cubytes('password', base_options.PASSWORD_SIZE)
+        #username = str2cubytes('username', base_options.LOGIN_SIZE)
+        #password = str2cubytes('password', base_options.PASSWORD_SIZE)
         
         print("Data size={0}".format( ctypes.sizeof(packet)))
         self._sock.send(packet)

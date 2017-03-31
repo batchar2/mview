@@ -4,7 +4,7 @@ import select
 import socket
 import logging
 
-from .nuclient import NuClient
+from .nuclient.nuclient import NuClient
 
 from .settings import SETTINGS
 
@@ -34,18 +34,22 @@ class Nucleus:
     """ Максимальный размер пакета для системы """
     _PACKET_MAX_SIZE = 1300
 
+    _SETTINGS = None
 
-    def __init__(self, *, port, host, debug=None, unix_file_socket_path=None, packet_max_size=None):
+    def __init__(self, *, port, host, settings, debug=None, unix_file_socket_path=None):
         """ Конструктор класса
         :param port: номер порта, через который устанавливаются соединения
         :param host: ядрес хоста
+        :param settings: словарь настроек приложения
         :param debug: режим отладки приложения
+        :param unix_file_socket_path: путь до файлового сокета, через которого осуществляется обмен с нуклиентами
         """
         
         self._port, self._host = port, host
         self._DEBUG = debug or self._DEBUG
         self._unix_file_socket_path = unix_file_socket_path or self._unix_file_socket_path
-        self._PACKET_MAX_SIZE = packet_max_size or self._PACKET_MAX_SIZE
+        self._SETTINGS = settings
+        self._PACKET_MAX_SIZE = self._SETTINGS['PROTOCOLS']['PACKET_SIZE']
         """ Инициадизирую формат логгирования """
         logging_level = logging.ERROR
         if self._DEBUG:
@@ -107,7 +111,7 @@ class Nucleus:
         if pid == 0:
             client = NuClient(tcp_socket=client_socket, 
                                     file_chanel2nucleus=self._unix_file_socket_path,
-                                    packet_max_size=self._PACKET_MAX_SIZE)
+                                    settings=self._SETTINGS)
 
             client()
             sys.exit(0)

@@ -7,14 +7,7 @@ import logging
 
 from .fchanel import actions as ch_actions
 from .fchanel import factory as ch_factory
-#from . import factory_chanell_packet as ch_factory  
-#from . import chanell_actions as ch_actions
 
-#from .fchanel.netpackets import options as op
-
-from .settings import SETTINGS
-
-#from . import options 
 
 """
 Клиент ядра системы. Отвечает за связь с удаленным клиентом
@@ -46,51 +39,58 @@ class NuClient:
 
     _chanel2nucleus = None
     _tcp_socket = None
+    _SETTINGS = None
     _PACKET_MAX_SIZE = None
     
     _chanel_packet_creator = None
 
-    def __init__(self, *, tcp_socket, file_chanel2nucleus, packet_max_size):
+    def __init__(self, *, tcp_socket, file_chanel2nucleus, settings):
         """ Конструктор класса
         :param tcp_socket: tcp-сокет, созданный при установлении связи с клиентом. 
                         Нужен для авторизации и обменом текстовых сообщений
         :param file_chanel2nucleus: имя файла-сокета, для связи с ядром
-        :param packet_max_size: максимальный размер пакета 
+        :param settings: словарь настроек приложения
         """
         
-        self._PACKET_MAX_SIZE = packet_max_size
+        self._SETTINGS = settings        
+        self._PACKET_MAX_SIZE = self._SETTINGS['PROTOCOLS']['PACKET_SIZE']
 
         self._chanel2nucleus = ChanelPipeClient2Nucleus(file_chanel2nucleus)
         self._tcp_socket = tcp_socket
         self._init_action_chanell_packet()
 
 
+    @property
+    def settings(self):
+        return self._SETTINGS
+
+
     def _init_action_chanell_packet(self):
         """ Инициализация обработчиков пакетов канального уровня
             Через фабричный метод.
         """
-        self._chanel_packet_creator = ch_factory.ChanelPacketCreator()
+        self._chanel_packet_creator = ch_factory.ChanelPacketCreator(settings=self.settings)
         
 
-        chanel = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']
+        protocol = self._SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']
         # нормальный тип пакета
-        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_NORMAL'], 
+        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'], 
                 concrete_factory=ch_factory.PacketCreatorNormal(), 
                 cmd=ch_actions.ActionTypeNormal(related_object=self))
         # пакет проверки качества соединения с сервером
-        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_QOS'],
+        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_QOS'],
                 concrete_factory=ch_factory.PacketCreatorQOS(),
                 cmd=ch_actions.ActionTypeQOS(related_object=self))
         # пакет с информацией о публичном ключе клиента
-        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE'],
+        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE'],
                 concrete_factory=ch_factory.PacketCreatorClientSendPublicKey(), 
                 cmd=ch_actions.ActionTypeClientSendPublicKey(related_object=self))
         # пакет с закрытым-симметричный ключем клиента
-        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'],
+        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'],
                 concrete_factory=ch_factory.PacketCreatorClientSendPrivateSimmetricKey(),
                 cmd=ch_actions.ActionTypeClientSendPrivateKey(related_object=self))
         # пакет с идентификатором пользователя (логин и пароль)
-        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_AUTORIZATION'],
+        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION'],
                 concrete_factory=ch_factory.PacketCreatorClientAuth(),
                 cmd=ch_actions.ActionTypeClientAuth(related_object=self))
         
@@ -156,7 +156,7 @@ class NuClient:
         Выполняет чтение данных с каналов, декодирование и пересылка ядру системы
         """
 
-        packet_size = SETTINGS['PROTOCOLS']['PACKET_SIZE']
+        packet_size = self._SETTINGS['PROTOCOLS']['PACKET_SIZE']
 
         while True:
             # Формирую список дескрипторов, для опроса данных с них
