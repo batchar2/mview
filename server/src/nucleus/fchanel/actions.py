@@ -3,13 +3,15 @@ import logging
 
 from abc import ABC, abstractmethod
 
-from .netpackets import options as op 
+#from .netpackets import options as op 
 from .netpackets import chanel
+
+from ..settings import SETTINGS
 
 #from .nucpackets import packets as nucpackets
 #from .nucpackets import options as nop
 
-from .. import options as bopt
+#from .. import options as bopt
 
 class Action(ABC):
     """ Класс "команда", реализует вызов функции. Используется для связи с клиентом """

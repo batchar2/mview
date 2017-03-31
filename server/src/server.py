@@ -3,9 +3,11 @@
 from nucleus import Nucleus
 
 
-
+from nucleus.settings import SETTINGS 
 
 if __name__ == '__main__':
-    nucl = Nucleus(port=9988, host='0.0.0.0', debug=True)
+    
+    packet_max_size = SETTINGS['PROTOCOLS']['PACKET_SIZE']
+    nucl = Nucleus(port=9988, host='0.0.0.0', debug=True, packet_max_size=packet_max_size)
 
     nucl()

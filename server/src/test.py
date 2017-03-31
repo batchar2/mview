@@ -9,7 +9,10 @@ from io import BytesIO
 from nucleus.fchanel.netpackets import chanel as ch
 from nucleus.fchanel.netpackets import options as op
 
-from nucleus import options as base_options
+
+from nucleus.settings import SETTINGS
+
+#from nucleus import options as base_options
 class Client:
 
     _sock = None

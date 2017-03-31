@@ -5,18 +5,16 @@ import select
 import socket
 import logging
 
-
-
-
 from .fchanel import actions as ch_actions
 from .fchanel import factory as ch_factory
 #from . import factory_chanell_packet as ch_factory  
 #from . import chanell_actions as ch_actions
 
-from .fchanel.netpackets import options as op
+#from .fchanel.netpackets import options as op
 
+from .settings import SETTINGS
 
-from . import options 
+#from . import options 
 
 """
 Клиент ядра системы. Отвечает за связь с удаленным клиентом
@@ -73,24 +71,26 @@ class NuClient:
         """
         self._chanel_packet_creator = ch_factory.ChanelPacketCreator()
         
+
+        chanel = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']
         # нормальный тип пакета
-        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_NORMAL, 
+        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_NORMAL'], 
                 concrete_factory=ch_factory.PacketCreatorNormal(), 
                 cmd=ch_actions.ActionTypeNormal(related_object=self))
         # пакет проверки качества соединения с сервером
-        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_QOS,
+        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_QOS'],
                 concrete_factory=ch_factory.PacketCreatorQOS(),
                 cmd=ch_actions.ActionTypeQOS(related_object=self))
         # пакет с информацией о публичном ключе клиента
-        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE,
+        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE'],
                 concrete_factory=ch_factory.PacketCreatorClientSendPublicKey(), 
                 cmd=ch_actions.ActionTypeClientSendPublicKey(related_object=self))
         # пакет с закрытым-симметричный ключем клиента
-        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE,
+        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'],
                 concrete_factory=ch_factory.PacketCreatorClientSendPrivateSimmetricKey(),
                 cmd=ch_actions.ActionTypeClientSendPrivateKey(related_object=self))
         # пакет с идентификатором пользователя (логин и пароль)
-        self._chanel_packet_creator.addAction(packet_type=op.CHANEL_PACKET_TYPE_AUTORIZATION,
+        self._chanel_packet_creator.addAction(packet_type=chanel['PACKET_TYPE_AUTORIZATION'],
                 concrete_factory=ch_factory.PacketCreatorClientAuth(),
                 cmd=ch_actions.ActionTypeClientAuth(related_object=self))
         
@@ -155,15 +155,19 @@ class NuClient:
         """
         Выполняет чтение данных с каналов, декодирование и пересылка ядру системы
         """
+
+        packet_size = SETTINGS['PROTOCOLS']['PACKET_SIZE']
+
         while True:
             # Формирую список дескрипторов, для опроса данных с них
             rfds = [self._tcp_socket, self._chanel2nucleus.socket]
             
+
             # Жду прихода данных на один из дескипторов
             fd_reads, _, e = select.select(rfds, [], [])
             for fd in rfds:
                 if fd == self._tcp_socket:
-                    data = fd.recv(op.CHANEL_PACKET_SIZE)
+                    data = fd.recv(packet_size)
                     if data:
                         self._chanel_packet_creator.make_packet_chanel(data)
                     else:
