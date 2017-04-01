@@ -2,7 +2,9 @@ import logging
 from abc import ABC, abstractmethod
 
 from factory.base_action import BaseAction
-
+"""
+обработчик сообщений от клиенских процессов.
+"""
 
 
 class ActionTypeNormal(BaseAction):
