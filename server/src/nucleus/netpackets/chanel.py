@@ -5,7 +5,13 @@ from abc import ABCMeta, abstractmethod
 from settings import SETTINGS
 
 """
+1. Канальный
 Описание структуры сетевых пакетов канального уровня
+
+
+Пакет канального уровня: в него оборачиваются все данные. Имеет два состояние: авторизация и обмен даннымим
+
+служит для возможности доставки информации от клиента к серверу
 """
 
 
@@ -36,6 +42,21 @@ class ChanelLevelPacket(ctypes.LittleEndianStructure):
         # Тело сообщения
         ('body', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['PACKET_SIZE'])
     ]
+
+
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Дальше обрезаем
+
+
+
+
+
+
+
+
+
+
 
 
 
