@@ -7,7 +7,8 @@ from netpackets import nucleus
 from factory.base_creator import BaseCreator
 
 """
-реализация фабричных методов. Дапнные методы выполня.т приведение типа пакета к определенной структуре. Пакет от пользовательских процессов к ядру
+Реализация фабричных методов. Данные методы выполняют приведение типа пакета к определенной структуре.
+Пакет движется от пользовательских процессов к ядру
 """
 
 
@@ -15,7 +16,7 @@ class NucleusPacketCreatorNormal(BaseCreator):
     """  Создатель "нормального пакета" """
     
     def factory_method(self, data):
-        logging.info('Пакет определен как PACKET_TYPE_NORMAL')
+        logging.info('Ядро: NucleusPacketCreatorNormal')
         pass
 
 
@@ -23,5 +24,7 @@ class NucleusPacketRequestAuth(BaseCreator):
     """  Запрос на авторизацию клиента """
     
     def factory_method(self, data):
-        pass
+        logging.info('Ядро: NucleusPacketRequestAuth')
+        return nucleus.NucleusPacketRequestAuth.from_buffer_copy(data)
+
 

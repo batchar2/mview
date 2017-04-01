@@ -14,6 +14,19 @@ from nucleus.netpackets import chanel
 
 from nucleus.settings import SETTINGS
 
+
+from nucleus.cubytes import str2cubytes, cubutes2str
+
+"""
+def str2cubytes(string, size):
+    return (ctypes.c_ubyte * size)(*[ctypes.c_ubyte(ord(char)) for char in string])
+def cubutes2str(cubytes):
+    symbols =  [chr(byte) for byte in cubytes]
+    string = ""
+    for symbol in symbols:
+        string += symbol
+    return string
+"""
 #from nucleus import options as base_options
 class Client:
 
@@ -74,10 +87,15 @@ class Client:
         packet.type =  SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_AUTORIZATION']
         packet.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
          # УБРАТЬ, сделано для тестов !!!!
-        str2cubytes = lambda s, size: ctypes.cast(s, ctypes.POINTER(ctypes.c_ubyte * size))[0]
+        #str2cubytes = lambda s, size: ctypes.cast(s, ctypes.POINTER(ctypes.c_ubyte * size))[0]
         username = str2cubytes('username', SETTINGS['PROTOCOLS']['LOGIN_SIZE'])
         password = str2cubytes('password', SETTINGS['PROTOCOLS']['PASSWORD_SIZE'])
         
+        packet.username = username
+        packet.password = password
+
+        u = str2cubytes('username', SETTINGS['PROTOCOLS']['LOGIN_SIZE'])
+        print("user_name=", cubutes2str(u))
         print("Data size={0}".format( ctypes.sizeof(packet)))
         self._sock.send(packet)
 

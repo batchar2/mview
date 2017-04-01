@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from .tables import User
+from .tables import User, Base
 
 from settings import SETTINGS
 
@@ -82,7 +82,7 @@ class DataBase:
 			Возвращаемое значение сессия и статус попытки: session_uid, True (False)
 		"""
 		session_uid = '1234567890'
-		return session_uid, True
+		return session_uid, False
 
 
 	def _commit(self, data):

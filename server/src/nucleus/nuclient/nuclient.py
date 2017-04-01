@@ -88,30 +88,30 @@ class NuClient:
         # нормальный тип пакета
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'], 
                 concrete_factory=ch_creators.CreatorPacketNormal(), 
-                cmd=ch_actions.ActionTypeNormal(related_object=self))
+                cmd=ch_actions.ActionNormal(related_object=self))
         # пакет проверки качества соединения с сервером
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_QOS'],
                 concrete_factory=ch_creators.CreatorPacketQOS(),
-                cmd=ch_actions.ActionTypeQOS(related_object=self))
+                cmd=ch_actions.ActionQOS(related_object=self))
         # пакет с информацией о публичном ключе клиента
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE'],
                 concrete_factory=ch_creators.CreatorPacketClientSendPublicKey(), 
-                cmd=ch_actions.ActionTypeClientSendPublicKey(related_object=self))
+                cmd=ch_actions.ActionClientSendPublicKey(related_object=self))
         # пакет с закрытым-симметричный ключем клиента
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'],
                 concrete_factory=ch_creators.CreatorPacketClientSendPrivateSimmetricKey(),
-                cmd=ch_actions.ActionTypeClientSendPrivateKey(related_object=self))
+                cmd=ch_actions.ActionClientSendPrivateKey(related_object=self))
         # пакет с идентификатором пользователя (логин и пароль)
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION'],
                 concrete_factory=ch_creators.CreatorPacketClientAuth(),
-                cmd=ch_actions.ActionTypeClientAuth(related_object=self))
+                cmd=ch_actions.ActionClientAuth(related_object=self))
         
 
     def _init_action_nucleus_packet(self):
         """ 
         Инициализация обработчиков сообщений от ядра системы
         """
-        protocol = self._SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']
+        protocol = self._SETTINGS['PROTOCOLS']['NUCLEUS']['PROTOCOL']
 
         self._factory_method_nucleus = FactoryMethod()
         # пакет для пересылки пользователю
@@ -209,9 +209,11 @@ class NuClient:
                         sys.exit(0)
                 # Данные от ядра для пользователя
                 elif fd == self._chanel2nucleus.socket:
-                    #print('udp')
-                    #print("DATA == ", data)
-                    self._factory_method_nucleus.response(data)
+                    if data:
+                        self._factory_method_nucleus.response(data)
+                    else:
+                        fd.close()
+                        sys.exit(0)
         sys.exit(0)
                     
 

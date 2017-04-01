@@ -8,17 +8,21 @@ from netpackets import nucleus
 
 from factory.base_action import BaseAction
 
+from cubytes import str2cubytes, cubutes2str
 
-class ActionTypeNormal(BaseAction):
+
+from settings import SETTINGS
+
+class ActionNormal(BaseAction):
     """  Обработка "нормального"" пакета """
     def __init__(self, *, related_object=None):
-        super(ActionTypeNormal, self).__init__(related_object=related_object)
+        super().__init__(related_object=related_object)
 
     def __call__(self, *, packet=None):
         logging.info('Обрабатываем данный пакет ActionTypeNormal. Хочу преобразовать в сетевой')
 
 
-class ActionTypeQOS(BaseAction):
+class ActionQOS(BaseAction):
     """  Обработка "нормального" пакета """
     def __init__(self, *, related_object=None):
         super().__init__(related_object=related_object)
@@ -28,7 +32,7 @@ class ActionTypeQOS(BaseAction):
 
 
 
-class ActionTypeClientSendPublicKey(BaseAction):
+class ActionClientSendPublicKey(BaseAction):
     """  Обработка пакета с публичным ключем клиента """
     def __init__(self, *, related_object=None):
         super().__init__(related_object=related_object)
@@ -60,7 +64,7 @@ class ActionTypeClientSendPublicKey(BaseAction):
         
 
 
-class ActionTypeClientSendPrivateKey(BaseAction):
+class ActionClientSendPrivateKey(BaseAction):
     """  Обработка пакета с закрытым симетричным ключем клиента. Зашифрован открытым ключем сервера """
     def __init__(self, *, related_object=None):
         super().__init__(related_object=related_object)
@@ -87,7 +91,7 @@ class ActionTypeClientSendPrivateKey(BaseAction):
         self.related_object.send_user(packet=ans_packet)
 
 
-class ActionTypeClientAuth(BaseAction):
+class ActionClientAuth(BaseAction):
     """ Принятие логина и пароля от пользователя.
         Зашифрованы симетричным ключем
     """
@@ -102,17 +106,21 @@ class ActionTypeClientAuth(BaseAction):
         """
         settings = self.related_object.settings['PROTOCOLS']
 
+        username = cubutes2str(packet.username)
+        password = cubutes2str(packet.password)
 
-        logging.info('ПЫТАЮСЬ АВТОРИЗОВАТЬ ПОЛЬЗОВАТЕЛЯ')
+        logging.info('Клиент получил логин и пароль пользователя: {0}  {1}'.format(username, password))
         
-        username = None #self.related_object.decode_aes(data=packet.username)
-        password = None #self.related_object.decode_aes(data=packet.password)
-
         nuc_packet = nucleus.NucleusPacketRequestAuth()
         nuc_packet.magic_number = settings['MAGIC_NUMBER']
         nuc_packet.version = settings['NUCLEUS']['PROTOCOL']['PACKET_VERSION']
-        #nuc_packet.username = username
-        #nuc_packet.password = password
+        #nuc_packet.username = str2cubytes(username, SETTINGS['PROTOCOLS']['LOGIN_SIZE']) #packet.username 
+        #nuc_packet.password = str2cubytes(password, SETTINGS['PROTOCOLS']['PASSWORD_SIZE']) #packet.password
+        
+        nuc_packet.username = packet.username 
+        nuc_packet.password = packet.password
+        
+
         nuc_packet.type = settings['NUCLEUS']['PROTOCOL']['PACKET_TYPE_AUTORIZATION']
         
         self.related_object.request_nucleus(packet=nuc_packet)

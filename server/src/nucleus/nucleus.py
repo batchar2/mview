@@ -53,6 +53,7 @@ class Nucleus:
     # сюда заносится активный клиент, с которомы в данный момент общается система
     _active_client = None 
 
+    _data_base = None
 
     def __init__(self, *, port, host, settings, debug=None, unix_file_socket_path=None):
         """ Конструктор класса
@@ -65,7 +66,6 @@ class Nucleus:
         
         # подтираем уничтоженные процессы       
         signal.signal(signal.SIGCHLD, self._handle_sigchld)
-
 
         self._port, self._host = port, host
         self._DEBUG = debug or self._DEBUG
@@ -86,6 +86,12 @@ class Nucleus:
         self._init_tcp_listen_socket()
         self._init_chanel2clients_socket()
         self._init_action_nucleus_packet()
+
+        self._data_base = DataBase()
+
+    @property
+    def data_base(self):
+        return self._data_base
 
 
     def _handle_sigchld(self, signum, frame):
@@ -166,6 +172,15 @@ class Nucleus:
                     sockets.append(fd)
             self._clients_unix = sockets
 
+
+    def send_active_nuclient_packet(self, *, packet):
+        """
+        Отправка данных активному клиенту
+        """
+        if self._active_client is not None:
+            self._active_client.send(packet)
+            self._active_client = None
+            logging.info('Ядро --> Клиент')
 
 
     def _create_client_process(self, *, tcp_socket):
