@@ -4,7 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 
 from netpackets import chanel
-
+from netpackets import nucleus
 
 class Action(ABC):
     """ Класс "команда", реализует вызов функции. Используется для связи с клиентом """
@@ -121,23 +121,25 @@ class ActionTypeClientAuth(Action):
             Отправляю ядру на верификацию
             Ответ придет позже, асинхронно (еще не сделано)
         """
+        settings = self.related_object.settings['PROTOCOLS']
+
 
         logging.info('ПЫТАЮСЬ АВТОРИЗОВАТЬ ПОЛЬЗОВАТЕЛЯ')
         
         username = None #self.related_object.decode_aes(data=packet.username)
         password = None #self.related_object.decode_aes(data=packet.password)
 
-        # Перенаправляю запрос другому клиенту (ядра) !!!!
-        """ Тут не должно быть этого кода
-        nuc_packet = nucpackets.NuPacketRequestAuth()
-        nuc_packet.magic_number = bopt.MAGIC_NUMBER
 
-        nuc_packet.username = username
-        nuc_packet.password = password
-        nuc_packet.type = nop.NUC_AUTH_REQUEST
+
+        
+        nuc_packet = nucleus.NucleusPacketRequestAuth()
+        nuc_packet.magic_number = settings['MAGIC_NUMBER']
+        nuc_packet.version = settings['NUCLEUS']['PROTOCOL']['PACKET_VERSION']
+        #nuc_packet.username = username
+        #nuc_packet.password = password
+        nuc_packet.type = settings['NUCLEUS']['PROTOCOL']['PACKET_TYPE_AUTORIZATION']
         
         self.related_object.request_nucleus(packet=nuc_packet)
         
 
-        """
         

@@ -6,7 +6,7 @@ from settings import SETTINGS
 Протокол коммуникации клиенских процессов и ядра
 """
 
-class NuPacket(ctypes.LittleEndianStructure):
+class BaseNucleusPacket(ctypes.LittleEndianStructure):
     """ Базовый пакет, необходимый для идентификации типа пакета ядром сиситемы """
     _fields_ = [
         # Магическое число, отличающее пакет от прочего мусора
@@ -18,7 +18,7 @@ class NuPacket(ctypes.LittleEndianStructure):
     ]
 
 
-class NuPacketRequestAuth(ctypes.LittleEndianStructure):
+class NucleusPacketRequestAuth(ctypes.LittleEndianStructure):
     """ Запрос авторизовать пользователя с таким идентификатором """
     _fields_ = [
         # Магическое число, отличающее пакет от прочего мусора
@@ -35,7 +35,7 @@ class NuPacketRequestAuth(ctypes.LittleEndianStructure):
         ('password', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['PASSWORD_SIZE']),
     ]
 
-class NuPacketResponseAuth(ctypes.LittleEndianStructure):
+class NucleusPacketResponseAuth(ctypes.LittleEndianStructure):
     """ Ответ ядра на попытку авторизовать пользователя """
     _fields_ = [
         # Магическое число, отличающее пакет от прочего мусора

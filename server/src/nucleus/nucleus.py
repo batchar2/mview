@@ -5,11 +5,15 @@ import select
 import socket
 import logging
 
+
+import factory
+import actions
+
 from .nuclient.nuclient import NuClient
 
 from .settings import SETTINGS
 
-
+from .netpackets import nucleus
 
 
 class Nucleus:
@@ -40,6 +44,9 @@ class Nucleus:
 
     _SETTINGS = None
 
+    # Фабричный метод идентификации пакетов уровня ядра
+    _nucleus_packet_creator = None
+
     def __init__(self, *, port, host, settings, debug=None, unix_file_socket_path=None):
         """ Конструктор класса
         :param port: номер порта, через который устанавливаются соединения
@@ -67,6 +74,7 @@ class Nucleus:
         
         self._init_tcp_listen_socket()
         self._init_chanel2clients_socket()
+        self._init_action_nucleus_packet()
 
 
     def _init_tcp_listen_socket(self):
@@ -87,8 +95,24 @@ class Nucleus:
         self._unix_file_socket.listen()
 
 
-    def __call__(self):
+    def _init_action_nucleus_packet(self):
+        """ Инициализация обработчиков пакетов ядра
+            Через фабричный метод.
+        """
+        protocol = self._SETTINGS['PROTOCOLS']['NUCLEUS']['PROTOCOL']
+        self._nucleus_packet_creator = factory.NucleusPacketCreator(settings=self.settings)
+        # нормальный тип пакета
+        self._nucleus_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'], 
+                concrete_factory=factory.NucleusPacketCreatorNormal(), 
+                cmd=actions.ActionTypeNormal(related_object=self))
+        self._nucleus_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION'], 
+                concrete_factory=factory.NucleusPacketRequestAuth(), 
+                cmd=actions.ActionTypeRequestAuth(related_object=self))
 
+
+    def __call__(self):
+        """ Главный цикл приложения """
+        packet_size = self._SETTINGS['PROTOCOLS']['PACKET_SIZE']
         while True:
             rfds = self._clients_unix + [self._tcp_socket, self._unix_file_socket]
             fd_reads, _, e = select.select(rfds, [], [])
@@ -98,11 +122,26 @@ class Nucleus:
                     self._create_client_process(tcp_socket=fd)
                 elif fd == self._unix_file_socket:
                     """ Подключение клиентского процесса к ядру системы """
+                    
                     self._create_chanel_client2nucleus(unix_socket=fd)
                 else:
+                    """ Обработка данных от клиенских процессов   """
+                    logging.info('Ядро <-- Клиент')
+                    data = fd.recv(packet_size)
+                    if data:
+                        """ Получаю и парсю данные от клиенского процесса. Вызывается соответствующий обработчик """
+                        logging.info('Ядро <-- Клиент')
+                        self._nucleus_packet_creator.make_packet_nucleus(data)
+                    else:
+                        logging.info('Клиенский процесс отключился')
+                        fd.close()
+                        # Костыльчик, УБРАТЬ!!!!
+                        sockets = []
+                        for f in self._clients_unix:
+                            if f != fd:
+                                sockets.append(fd)
+                        self._clients_unix = sockets
 
-                    """ Обмен даннымим между клиенскими процессами """
-                    self._read_unix_client_data(unix_client_socket=fd)
 
 
     def _create_client_process(self, *, tcp_socket):
@@ -116,8 +155,7 @@ class Nucleus:
         if pid == 0:
             client = NuClient(tcp_socket=client_socket, 
                                     file_chanel2nucleus=self._unix_file_socket_path,
-                                    settings=self._SETTINGS)
-
+                                    settings=self.settings)
             client()
             sys.exit(0)
         
@@ -132,27 +170,10 @@ class Nucleus:
         logging.info('Было подключено клиенское приложение')
 
 
-    def _read_unix_client_data(self, *, unix_client_socket):
-
-        #logging.info(u'Ядро <-- Клиент {0}'.format(unix_client_socket))
-        logging.info('Ядро <-- Клиент')
-
-        data = unix_client_socket.recv(self._PACKET_MAX_SIZE)
-
-        if data:
-            for fd in self._clients_unix:
-                logging.info(u'Ядро --> Клиент {0}'.format(fd))
-                fd.send(data)
-        else:
-            logging.info('Клиенский процесс отключился')
-            unix_client_socket.close()
-            # Костыльчик, УБРАТЬ!!!!
-            sockets = []
-            for fd in self._clients_unix:
-                if fd != unix_client_socket:
-                    sockets.append(fd)
-            self._clients_unix = sockets
-
 
     def __del__(self):
         pass
+
+    @property
+    def settings(self):
+        return self._SETTINGS
