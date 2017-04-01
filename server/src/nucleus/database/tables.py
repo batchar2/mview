@@ -28,6 +28,6 @@ class User(Base):
 		self.password = password
 		self.is_active = True
 
-engine = create_engine(SETTINGS['DATABASE']['ENGINE'])
+engine = sql.create_engine(SETTINGS['DATABASE']['ENGINE'])
 Base.metadata.create_all(engine)
 

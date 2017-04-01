@@ -17,6 +17,8 @@ from .netpackets import nucleus
 from .factory.method import FactoryMethod
 
 
+from .database import DataBase
+
 class Nucleus:
     """ Ядро системы, выполняет маршрутизацию сообщений между клиентами, 
             и впреспективе, между ядрами дургих систем (горизонтальное масштабирование)
