@@ -54,6 +54,8 @@ class ActionTypeClientSendPublicKey(BaseAction):
         #ans_packet.key = str2cubytes(public_key, op.CHANEL_PACKET_AUTH_BODY_SIZE) 
         ans_packet.length = len(public_key)
 
+
+        self.related_object.send_user(packet=ans_packet)
         self.related_object.send_user(packet=ans_packet)
         
 

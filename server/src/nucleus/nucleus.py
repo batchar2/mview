@@ -48,6 +48,10 @@ class Nucleus:
     # Фабричный метод идентификации пакетов уровня ядра
     _factory_method = None
 
+    # сюда заносится активный клиент, с которомы в данный момент общается система
+    _active_client = None 
+
+
     def __init__(self, *, port, host, settings, debug=None, unix_file_socket_path=None):
         """ Конструктор класса
         :param port: номер порта, через который устанавливаются соединения
@@ -146,7 +150,10 @@ class Nucleus:
         data = client.recv(packet_size)
         if data:
             """ Получаю и парсю данные от клиенского процесса. Вызывается соответствующий обработчик """
+            # предварительно сохраняю состояние, кокому клиенту следует отвечать
+            self._active_client = client
             self._factory_method.response(data)
+
         else:
             logging.info('Клиенский процесс отключился')
             client.close()

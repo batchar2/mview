@@ -2,6 +2,9 @@ import logging
 from abc import ABC, abstractmethod
 
 from factory.base_action import BaseAction
+
+from netpackets import nucleus
+
 """
 обработчик сообщений от клиенских процессов.
 """
@@ -11,7 +14,6 @@ class ActionTypeNormal(BaseAction):
     """ Нормальный пакет. Это данные пользователя. Проверяю сессию и отпускаю """
     def __init__(self, *, related_object=None):
         super().__init__(related_object=related_object)
-
 
     def __call__(self, *, packet=None):
         logging.info('В ядро пришел нормальный пакет')
@@ -25,4 +27,7 @@ class ActionTypeRequestAuth(BaseAction):
 
 
     def __call__(self, *, packet=None):
+
         logging.info('В ядро запрос на авторизацию')
+
+        #nucleus

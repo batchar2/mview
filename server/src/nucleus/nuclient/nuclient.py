@@ -58,6 +58,9 @@ class NuClient:
         :param settings: словарь настроек приложения
         """
         
+        tcp_socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+
+
         self._SETTINGS = settings        
         self._PACKET_MAX_SIZE = self._SETTINGS['PROTOCOLS']['PACKET_SIZE']
 
@@ -67,6 +70,7 @@ class NuClient:
         # инициализирую обработчики данных
         self._init_action_chanell_packet()
         self._init_action_nucleus_packet()
+
 
     @property
     def settings(self):
@@ -159,7 +163,6 @@ class NuClient:
         """ Отправка пользователю пакета данных """
         self._tcp_socket.send(packet)
 
-
     def decode_rsa_data(self, *, data):
         """ Расшифровать данные от клиента """
         pass
@@ -194,10 +197,10 @@ class NuClient:
 
             # Жду прихода данных на один из дескипторов
             fd_reads, _, e = select.select(rfds, [], [])
-            for fd in rfds:
+            for fd in fd_reads:
                 # данные от пользователя по tcp-сокету
+                data = fd.recv(packet_size)
                 if fd == self._tcp_socket:
-                    data = fd.recv(packet_size)
                     if data:
                         self._factory_method_user.response(data)
                     else:
@@ -206,6 +209,8 @@ class NuClient:
                         sys.exit(0)
                 # Данные от ядра для пользователя
                 elif fd == self._chanel2nucleus.socket:
+                    #print('udp')
+                    #print("DATA == ", data)
                     self._factory_method_nucleus.response(data)
         sys.exit(0)
                     

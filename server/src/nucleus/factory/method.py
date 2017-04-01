@@ -10,8 +10,8 @@ from netpackets import chanel
 class FactoryMethod:
     """  Интерфейс, определяющий конструирование пакетов. Работа производится через него. Некий фасад  """
     
-    _packets_creators = {}
-    _SETTINGS = None
+    def __init__(self):
+        self._packets_creators = {}
 
     def addAction(self, *, packet_type, concrete_factory, cmd):
         """ Сопоставляем тип пакета, "построитель пакета" и обработчик информации
@@ -29,6 +29,10 @@ class FactoryMethod:
         """ По данным полученым из сети строится соответствующий сетевой пакет 
         :param data: данные, полученые по сети
         """
+        #print(self._packets_creators)
+        #print('---' * 10)
+        ##print('Len = {0}| {1}'.format(len(self._packets_creators), self._packets_creators))
+        #print("===" * 10)
         try:
             # выполняем преобразование данных в пакет БАЗОВОГО ФОРМАТА, для идентификации
             packet = chanel.BaseChanelLevelPacket.from_buffer_copy(data)

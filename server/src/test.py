@@ -66,6 +66,8 @@ class Client:
         print("length={0}".format(packet.length))
         #print("key={0}".format(packet.key))
         
+        #while True:
+            
         # Отправляю свои данные - логин и пароль
         packet = chanel.ChanelLevelPacketUserAuth()
         packet.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
@@ -73,8 +75,8 @@ class Client:
         packet.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
          # УБРАТЬ, сделано для тестов !!!!
         str2cubytes = lambda s, size: ctypes.cast(s, ctypes.POINTER(ctypes.c_ubyte * size))[0]
-        #username = str2cubytes('username', base_options.LOGIN_SIZE)
-        #password = str2cubytes('password', base_options.PASSWORD_SIZE)
+        username = str2cubytes('username', SETTINGS['PROTOCOLS']['LOGIN_SIZE'])
+        password = str2cubytes('password', SETTINGS['PROTOCOLS']['PASSWORD_SIZE'])
         
         print("Data size={0}".format( ctypes.sizeof(packet)))
         self._sock.send(packet)
@@ -92,6 +94,6 @@ class Client:
         self._sock.close()
 
 if __name__ == '__main__':
-    while True:
-        client = Client()
-        client()
+    #while True:
+    client = Client()
+    client()

@@ -55,13 +55,13 @@ SETTINGS =  {
             'CHANEL_BODY_SIZE': _PACKET_SIZE - 8,
             'PROTOCOL': {
                 'PACKET_VERSION': 1,
-                'PACKET_TYPE_NORMAL': 1,
+                'PACKET_TYPE_NORMAL': 21,
                 # клиент пересылает свой логин и пароль для проведения авторизации (клиент --> сервер)
-                'PACKET_TYPE_AUTORIZATION': 7,
+                'PACKET_TYPE_AUTORIZATION': 22,
                 # Успешное завершение авторизации (сервер --> клиент)
-                'PACKET_TYPE_AUTORIZATION_SUCCESS': 8,
+                'PACKET_TYPE_AUTORIZATION_SUCCESS': 23,
                 # Авторизация провалилась, ответ (сервер --> клиент)
-                'PACKET_TYPE_AUTORIZATION_FAIL': 9,
+                'PACKET_TYPE_AUTORIZATION_FAIL': 24,
             }           
         },
     },
