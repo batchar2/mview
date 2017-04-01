@@ -1,5 +1,7 @@
 import ctypes
 
+from settings import SETTINGS
+
 """
 Протокол коммуникации клиенских процессов и ядра
 """
@@ -29,8 +31,8 @@ class NuPacketRequestAuth(ctypes.LittleEndianStructure):
         ('length_username', ctypes.c_ushort),
         ('length_password', ctypes.c_ushort),
         # Тело сообщения (Логин и пароль в зашифрованом виде)
-        #('username', ctypes.c_ubyte * base_options.LOGIN_SIZE),
-        #('password', ctypes.c_ubyte * base_options.PASSWORD_SIZE),
+        ('username', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['NUCLEUS']['LOGIN_SIZE']),
+        ('password', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['NUCLEUS']['PASSWORD_SIZE']),
     ]
 
 class NuPacketResponseAuth(ctypes.LittleEndianStructure):
@@ -45,5 +47,5 @@ class NuPacketResponseAuth(ctypes.LittleEndianStructure):
         # оnтвет сиситемы NUC_AUTH_SUCCESS или NUC_AUTH_FAILED
         ('response', ctypes.c_uint32, 32),
         # идентификатор сессии
-        ('uuid', ctypes.c_ubyte * op.NUC_UUID_SIZE),
+        ('uuid', ctypes.c_ubyte *  SETTINGS['PROTOCOLS']['NUCLEUS']['UUID_SIZE']),
     ]

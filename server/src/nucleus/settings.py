@@ -49,6 +49,13 @@ SETTINGS =  {
 		'NETWORK': {
 
 		},
+		'NUCLEUS': {
+			'CHANEL_BODY_SIZE': _PACKET_SIZE - 8,
+			'LOGIN_SIZE':	128,
+			'PASSWORD_SIZE': 128,
+			'KEY_SIZE': 128,
+			'UUID_SIZE': 32,
+		},
 	},
 	# расположение пакета с описанием сетвых пакетов. Относительный путь
 	'PACKET_HEADERS_PAKET_PATH': 'nucleus',
