@@ -61,22 +61,12 @@ class Nucleus:
         logging.basicConfig(format=u'%(filename)s[LINE:%(lineno)d]# %(levelname)-8s [%(asctime)s]  %(message)s', 
                                 level=logging_level)
 
+
         logging.info('Запуск сервера {0}:{1}'.format(self._host, self._port))
         logging.info('UNIX socket-path={0}'.format(self._unix_file_socket_path))
         
         self._init_tcp_listen_socket()
         self._init_chanel2clients_socket()
-
-
-    def _add_packets_header_to_path(self, path):
-        """
-        Добавляю пакет с описанием расположения заголовков пакетов в пути импорта
-        """
-        abspath = os.path.abspath(path)
-
-        sys.path.append(abspath)
-
-
 
 
     def _init_tcp_listen_socket(self):
@@ -113,7 +103,7 @@ class Nucleus:
 
                     """ Обмен даннымим между клиенскими процессами """
                     self._read_unix_client_data(unix_client_socket=fd)
-            
+
 
     def _create_client_process(self, *, tcp_socket):
         """Создаем новый процесс ответственный за комуникацию с ядром"""
@@ -162,6 +152,7 @@ class Nucleus:
                 if fd != unix_client_socket:
                     sockets.append(fd)
             self._clients_unix = sockets
+
 
     def __del__(self):
         pass

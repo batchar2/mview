@@ -1,6 +1,8 @@
 """
 Располоджены глобальные опции проекта
 """
+import os
+import sys
 
 # размер пакета (сетевого - максимальный)
 _PACKET_SIZE = 8 + 1292
@@ -49,5 +51,5 @@ SETTINGS =  {
 		},
 	},
 	# расположение пакета с описанием сетвых пакетов. Относительный путь
-	'PACKET_HEADERS_PAKET_PATH': 'packets',
+	'PACKET_HEADERS_PAKET_PATH': 'nucleus',
 }

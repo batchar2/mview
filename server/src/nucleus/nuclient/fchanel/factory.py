@@ -4,9 +4,7 @@ import logging
 from abc import ABC, abstractmethod
 
 
-from .netpackets.chanel import (ChanelLevelPacket, BaseChanelLevelPacket, ChanelLevelPacketKeyAuth, ChanelLevelPacketUserAuth)
-from .netpackets import options as op
-
+from netpackets import chanel 
 
 """
 Реализуется паттерн "Фабричный метод", для идентификации принятых пакетов.
@@ -29,7 +27,7 @@ class PacketCreatorNormal(PacketCreator):
     
     def factory_method(self, data):
         logging.info('Пакет определен как CHANEL_PACKET_TYPE_NORMAL')
-        return ChanelLevelPacket.from_buffer_copy(data)
+        return chanel.ChanelLevelPacket.from_buffer_copy(data)
 
 
 class PacketCreatorClientSendPublicKey(PacketCreator):
@@ -37,7 +35,7 @@ class PacketCreatorClientSendPublicKey(PacketCreator):
     
     def factory_method(self, data):
         logging.info('Пакет определен как CHANEL_PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE')
-        return ChanelLevelPacketKeyAuth.from_buffer_copy(data)
+        return chanel.ChanelLevelPacketKeyAuth.from_buffer_copy(data)
 
 
 class PacketCreatorServerSendPublicKey(PacketCreator):
@@ -45,7 +43,7 @@ class PacketCreatorServerSendPublicKey(PacketCreator):
     
     def factory_method(self, data):
         logging.info('Пакет определен как CHANEL_PACKET_TYPE_PUBLIC_KEY_SERVER_CLIENT_EXCHANGE')
-        return ChanelLevelPacketKeyAuth.from_buffer_copy(data)
+        return chanel.ChanelLevelPacketKeyAuth.from_buffer_copy(data)
 
 
 class PacketCreatorClientSendPrivateSimmetricKey(PacketCreator):
@@ -53,7 +51,7 @@ class PacketCreatorClientSendPrivateSimmetricKey(PacketCreator):
 
     def factory_method(self, data):
         logging.info('Получен запрос на принятие закрытого ключа CHANEL_PACKET_TYPE_PRIVATE_KEY_EXCHANGE')
-        return ChanelLevelPacketKeyAuth.from_buffer_copy(data)
+        return chanel.ChanelLevelPacketKeyAuth.from_buffer_copy(data)
 
 
 
@@ -61,14 +59,14 @@ class PacketCreatorClientAuth(PacketCreator):
     """ Клиент высылает свой логин и пароль """
     def factory_method(self, data):
         logging.info('Получен логин и пароль клиента CHANEL_PACKET_TYPE_AUTORIZATION')
-        return ChanelLevelPacketUserAuth.from_buffer_copy(data)
+        return chanel.ChanelLevelPacketUserAuth.from_buffer_copy(data)
         
 
 class PacketCreatorQOS(PacketCreator):
     """ Создатель пакета QOS  """
     
     def factory_method(self, data):
-        return ChanelLevelPacket.from_buffer_copy(data)
+        return chanel.ChanelLevelPacket.from_buffer_copy(data)
 
 
 class ChanelPacketCreator:
@@ -97,7 +95,7 @@ class ChanelPacketCreator:
         """
         try:
             # выполняем преобразование данных в пакет БАЗОВОГО ФОРМАТА, для идентификации
-            packet = BaseChanelLevelPacket.from_buffer_copy(data)
+            packet = chanel.BaseChanelLevelPacket.from_buffer_copy(data)
         except Exception as e:
             logging.error(str(e))
             return None

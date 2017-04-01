@@ -3,7 +3,7 @@ import logging
 
 from abc import ABC, abstractmethod
 
-from .netpackets import chanel
+from netpackets import chanel
 
 
 class Action(ABC):
