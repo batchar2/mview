@@ -29,10 +29,6 @@ class FactoryMethod:
         """ По данным полученым из сети строится соответствующий сетевой пакет 
         :param data: данные, полученые по сети
         """
-        #print(self._packets_creators)
-        #print('---' * 10)
-        ##print('Len = {0}| {1}'.format(len(self._packets_creators), self._packets_creators))
-        #print("===" * 10)
         try:
             # выполняем преобразование данных в пакет БАЗОВОГО ФОРМАТА, для идентификации
             packet = chanel.BaseChanelLevelPacket.from_buffer_copy(data)
@@ -41,7 +37,7 @@ class FactoryMethod:
             return None
 
         if packet is not None:
-            logging.info('Получен пакет размера: {0} байт'.format(ctypes.sizeof(packet)))
+            #logging.info('Получен пакет размера: {0} байт'.format(ctypes.sizeof(packet)))
             if SETTINGS['PROTOCOLS']['MAGIC_NUMBER'] == packet.magic_number:
                 # Идентифицируем пакет
                 if packet.type in self._packets_creators:

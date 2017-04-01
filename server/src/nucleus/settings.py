@@ -67,4 +67,7 @@ SETTINGS =  {
     },
     # расположение пакета с описанием сетвых пакетов. Относительный путь
     'PACKET_HEADERS_PAKET_PATH': 'nucleus',
+    'DATABASE' : {
+        'ENGINE': 'sqlite:///sqlite_database.db',
+    }
 }
