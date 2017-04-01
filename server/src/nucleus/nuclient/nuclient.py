@@ -5,8 +5,10 @@ import select
 import socket
 import logging
 
-from .fchanel import actions as ch_actions
-from .fchanel import factory as ch_factory
+from factory.method import FactoryMethod
+
+from .fchanel import actions
+from .fchanel import creators
 
 
 """
@@ -42,7 +44,7 @@ class NuClient:
     _SETTINGS = None
     _PACKET_MAX_SIZE = None
     
-    _chanel_packet_creator = None
+    _factory_method_user = None
 
     def __init__(self, *, tcp_socket, file_chanel2nucleus, settings):
         """ Конструктор класса
@@ -69,30 +71,30 @@ class NuClient:
         """ Инициализация обработчиков пакетов канального уровня
             Через фабричный метод.
         """
-        self._chanel_packet_creator = ch_factory.ChanelPacketCreator(settings=self.settings)
+        self._factory_method_user = FactoryMethod()
         
 
         protocol = self._SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']
         # нормальный тип пакета
-        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'], 
-                concrete_factory=ch_factory.PacketCreatorNormal(), 
-                cmd=ch_actions.ActionTypeNormal(related_object=self))
+        self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'], 
+                concrete_factory=creators.PacketCreatorNormal(), 
+                cmd=actions.ActionTypeNormal(related_object=self))
         # пакет проверки качества соединения с сервером
-        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_QOS'],
-                concrete_factory=ch_factory.PacketCreatorQOS(),
-                cmd=ch_actions.ActionTypeQOS(related_object=self))
+        self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_QOS'],
+                concrete_factory=creators.PacketCreatorQOS(),
+                cmd=actions.ActionTypeQOS(related_object=self))
         # пакет с информацией о публичном ключе клиента
-        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE'],
-                concrete_factory=ch_factory.PacketCreatorClientSendPublicKey(), 
-                cmd=ch_actions.ActionTypeClientSendPublicKey(related_object=self))
+        self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE'],
+                concrete_factory=creators.PacketCreatorClientSendPublicKey(), 
+                cmd=actions.ActionTypeClientSendPublicKey(related_object=self))
         # пакет с закрытым-симметричный ключем клиента
-        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'],
-                concrete_factory=ch_factory.PacketCreatorClientSendPrivateSimmetricKey(),
-                cmd=ch_actions.ActionTypeClientSendPrivateKey(related_object=self))
+        self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'],
+                concrete_factory=creators.PacketCreatorClientSendPrivateSimmetricKey(),
+                cmd=actions.ActionTypeClientSendPrivateKey(related_object=self))
         # пакет с идентификатором пользователя (логин и пароль)
-        self._chanel_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION'],
-                concrete_factory=ch_factory.PacketCreatorClientAuth(),
-                cmd=ch_actions.ActionTypeClientAuth(related_object=self))
+        self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION'],
+                concrete_factory=creators.PacketCreatorClientAuth(),
+                cmd=actions.ActionTypeClientAuth(related_object=self))
         
 
     def _read_nucleus2send_client(self):
@@ -169,7 +171,7 @@ class NuClient:
                 if fd == self._tcp_socket:
                     data = fd.recv(packet_size)
                     if data:
-                        self._chanel_packet_creator.make_packet_chanel(data)
+                        self._factory_method_user.response(data)
                     else:
                         logging.info(u'Клиент отключился')
                         fd.close()

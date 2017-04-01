@@ -6,14 +6,14 @@ import socket
 import logging
 
 
-import factory
+
 import actions
+import creators
 
 from .nuclient.nuclient import NuClient
-
 from .settings import SETTINGS
-
 from .netpackets import nucleus
+from .factory.method import FactoryMethod
 
 
 class Nucleus:
@@ -45,7 +45,7 @@ class Nucleus:
     _SETTINGS = None
 
     # Фабричный метод идентификации пакетов уровня ядра
-    _nucleus_packet_creator = None
+    _factory_method = None
 
     def __init__(self, *, port, host, settings, debug=None, unix_file_socket_path=None):
         """ Конструктор класса
@@ -100,13 +100,13 @@ class Nucleus:
             Через фабричный метод.
         """
         protocol = self._SETTINGS['PROTOCOLS']['NUCLEUS']['PROTOCOL']
-        self._nucleus_packet_creator = factory.NucleusPacketCreator(settings=self.settings)
+        self._factory_method = FactoryMethod()
         # нормальный тип пакета
-        self._nucleus_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'], 
-                concrete_factory=factory.NucleusPacketCreatorNormal(), 
+        self._factory_method.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'], 
+                concrete_factory=creators.NucleusPacketCreatorNormal(), 
                 cmd=actions.ActionTypeNormal(related_object=self))
-        self._nucleus_packet_creator.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION'], 
-                concrete_factory=factory.NucleusPacketRequestAuth(), 
+        self._factory_method.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION'], 
+                concrete_factory=creators.NucleusPacketRequestAuth(), 
                 cmd=actions.ActionTypeRequestAuth(related_object=self))
 
 
@@ -131,7 +131,7 @@ class Nucleus:
                     if data:
                         """ Получаю и парсю данные от клиенского процесса. Вызывается соответствующий обработчик """
                         logging.info('Ядро <-- Клиент')
-                        self._nucleus_packet_creator.make_packet_nucleus(data)
+                        self._factory_method.response(data)
                     else:
                         logging.info('Клиенский процесс отключился')
                         fd.close()
