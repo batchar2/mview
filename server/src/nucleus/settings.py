@@ -11,12 +11,14 @@ SETTINGS =  {
 	'PROTOCOLS': {
 		'MAGIC_NUMBER': 32189,
 		'PACKET_SIZE': _PACKET_SIZE,
+		'KEY_SIZE': 128,
+		'UUID_SIZE': 32,
+		'LOGIN_SIZE':	128,
+		'PASSWORD_SIZE': 128,
+
 		'CHANEL': {
 			# размер тела пакета канального уровн
 			'CHANEL_BODY_SIZE': _PACKET_SIZE - 8,
-			'LOGIN_SIZE':	128,
-			'PASSWORD_SIZE': 128,
-			'KEY_SIZE': 128,
 			'PROTOCOL': {
 				# магичесоке число для верификации и отличия от муссора
 				'PACKET_VERSION': 1,
@@ -50,11 +52,7 @@ SETTINGS =  {
 
 		},
 		'NUCLEUS': {
-			'CHANEL_BODY_SIZE': _PACKET_SIZE - 8,
-			'LOGIN_SIZE':	128,
-			'PASSWORD_SIZE': 128,
-			'KEY_SIZE': 128,
-			'UUID_SIZE': 32,
+			'CHANEL_BODY_SIZE': _PACKET_SIZE - 8,			
 		},
 	},
 	# расположение пакета с описанием сетвых пакетов. Относительный путь

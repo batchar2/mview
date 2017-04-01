@@ -37,8 +37,6 @@ class ChanelLevelPacket(ctypes.LittleEndianStructure):
         ('body', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['PACKET_SIZE'])
     ]
 
-    #def __init__(self, body_szie):
-    #    self.body
 
 
 class ChanelLevelPacketKeyAuth(ctypes.LittleEndianStructure):
@@ -55,7 +53,7 @@ class ChanelLevelPacketKeyAuth(ctypes.LittleEndianStructure):
         # размер данных
         ('length', ctypes.c_uint32, 32),
         # Тело сообщения (передаеся ключ)
-        ('key', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['CHANEL']['KEY_SIZE'])
+        ('key', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['KEY_SIZE'])
     ]
 
 
@@ -75,6 +73,6 @@ class ChanelLevelPacketUserAuth(ctypes.LittleEndianStructure):
         ('length_username', ctypes.c_ushort),
         ('length_password', ctypes.c_ushort),
         # Тело сообщения (Логин и пароль в зашифрованом виде)
-        ('username', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['CHANEL']['LOGIN_SIZE']),
-        ('password', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['CHANEL']['PASSWORD_SIZE']),
+        ('username', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['LOGIN_SIZE']),
+        ('password', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['PASSWORD_SIZE']),
     ]

@@ -1,6 +1,6 @@
 import ctypes
 
-
+from settings import SETTINGS
 """
 Описание пакетов сетевого уровня
 """
@@ -14,10 +14,10 @@ class NetworPacket(ctypes.LittleEndianStructure):
         # зарезервированное поле
         ('null', ctypes.c_uint32, 32),
         # ID отправителя
-        ('uid_sender', ctypes.c_uint32, 32),
+        ('uid_sender', ctypes.c_ubyte, 32),
         # ID-получателя
         ('uid_reciver', ctypes.c_uint32, 32),
         # ID-сессии пользователя отправившего сообщение
-        ('uuid_session', ctypes.c_ubyte * 16),
+        ('uuid_session', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['UUID_SIZE']),
            
     ]
