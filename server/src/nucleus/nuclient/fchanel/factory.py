@@ -7,7 +7,6 @@ from abc import ABC, abstractmethod
 from .netpackets.chanel import (ChanelLevelPacket, BaseChanelLevelPacket, ChanelLevelPacketKeyAuth, ChanelLevelPacketUserAuth)
 from .netpackets import options as op
 
-#from nucleus import options as base_options
 
 """
 Реализуется паттерн "Фабричный метод", для идентификации принятых пакетов.

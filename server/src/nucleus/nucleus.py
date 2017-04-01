@@ -8,6 +8,9 @@ from .nuclient.nuclient import NuClient
 
 from .settings import SETTINGS
 
+
+
+
 class Nucleus:
     """ Ядро системы, выполняет маршрутизацию сообщений между клиентами, 
             и впреспективе, между ядрами дургих систем (горизонтальное масштабирование)
