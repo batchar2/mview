@@ -106,9 +106,6 @@ class ActionTypeClientAuth(BaseAction):
         username = None #self.related_object.decode_aes(data=packet.username)
         password = None #self.related_object.decode_aes(data=packet.password)
 
-
-
-        
         nuc_packet = nucleus.NucleusPacketRequestAuth()
         nuc_packet.magic_number = settings['MAGIC_NUMBER']
         nuc_packet.version = settings['NUCLEUS']['PROTOCOL']['PACKET_VERSION']

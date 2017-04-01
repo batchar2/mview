@@ -7,8 +7,11 @@ import logging
 
 from factory.method import FactoryMethod
 
-from .fchanel import actions
-from .fchanel import creators
+from .fchanel import actions as ch_actions
+from .fchanel import creators as ch_creators
+
+from .fnucleus import actions as nuc_actions
+from .fnucleus import creators as nuc_creators
 
 
 """
@@ -45,6 +48,7 @@ class NuClient:
     _PACKET_MAX_SIZE = None
     
     _factory_method_user = None
+    _factory_method_nucleus = None
 
     def __init__(self, *, tcp_socket, file_chanel2nucleus, settings):
         """ Конструктор класса
@@ -59,8 +63,10 @@ class NuClient:
 
         self._chanel2nucleus = ChanelPipeClient2Nucleus(file_chanel2nucleus)
         self._tcp_socket = tcp_socket
-        self._init_action_chanell_packet()
 
+        # инициализирую обработчики данных
+        self._init_action_chanell_packet()
+        self._init_action_nucleus_packet()
 
     @property
     def settings(self):
@@ -77,25 +83,46 @@ class NuClient:
         protocol = self._SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']
         # нормальный тип пакета
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'], 
-                concrete_factory=creators.PacketCreatorNormal(), 
-                cmd=actions.ActionTypeNormal(related_object=self))
+                concrete_factory=ch_creators.CreatorPacketNormal(), 
+                cmd=ch_actions.ActionTypeNormal(related_object=self))
         # пакет проверки качества соединения с сервером
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_QOS'],
-                concrete_factory=creators.PacketCreatorQOS(),
-                cmd=actions.ActionTypeQOS(related_object=self))
+                concrete_factory=ch_creators.CreatorPacketQOS(),
+                cmd=ch_actions.ActionTypeQOS(related_object=self))
         # пакет с информацией о публичном ключе клиента
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE'],
-                concrete_factory=creators.PacketCreatorClientSendPublicKey(), 
-                cmd=actions.ActionTypeClientSendPublicKey(related_object=self))
+                concrete_factory=ch_creators.CreatorPacketClientSendPublicKey(), 
+                cmd=ch_actions.ActionTypeClientSendPublicKey(related_object=self))
         # пакет с закрытым-симметричный ключем клиента
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'],
-                concrete_factory=creators.PacketCreatorClientSendPrivateSimmetricKey(),
-                cmd=actions.ActionTypeClientSendPrivateKey(related_object=self))
+                concrete_factory=ch_creators.CreatorPacketClientSendPrivateSimmetricKey(),
+                cmd=ch_actions.ActionTypeClientSendPrivateKey(related_object=self))
         # пакет с идентификатором пользователя (логин и пароль)
         self._factory_method_user.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION'],
-                concrete_factory=creators.PacketCreatorClientAuth(),
-                cmd=actions.ActionTypeClientAuth(related_object=self))
+                concrete_factory=ch_creators.CreatorPacketClientAuth(),
+                cmd=ch_actions.ActionTypeClientAuth(related_object=self))
         
+
+    def _init_action_nucleus_packet(self):
+        """ 
+        Инициализация обработчиков сообщений от ядра системы
+        """
+        protocol = self._SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']
+
+        self._factory_method_nucleus = FactoryMethod()
+        # пакет для пересылки пользователю
+        self._factory_method_nucleus.addAction(packet_type=protocol['PACKET_TYPE_NORMAL'],
+                concrete_factory=nuc_creators.CreatorPacketNormal(),
+                cmd=nuc_actions.ActionNormal(related_object=self))
+        # пакет о статусе неудачной авторизации
+        self._factory_method_nucleus.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION_FAIL'],
+                concrete_factory=nuc_creators.CreatorPacketAuthResponseFail(),
+                cmd=nuc_actions.ActionAuthResponseFail(related_object=self))
+        # пакет с удачной авторизацией
+        self._factory_method_nucleus.addAction(packet_type=protocol['PACKET_TYPE_AUTORIZATION_SUCCESS'],
+                concrete_factory=nuc_creators.CreatorPacketAuthRespnseSuccess(),
+                cmd=nuc_actions.ActionAuthResponseSucess(related_object=self))
+
 
     def _read_nucleus2send_client(self):
         #logging.info(u'Принял данные от ядра {0}. Отправляю клиенту'.format(os.getpid()))
@@ -168,6 +195,7 @@ class NuClient:
             # Жду прихода данных на один из дескипторов
             fd_reads, _, e = select.select(rfds, [], [])
             for fd in rfds:
+                # данные от пользователя по tcp-сокету
                 if fd == self._tcp_socket:
                     data = fd.recv(packet_size)
                     if data:
@@ -176,9 +204,9 @@ class NuClient:
                         logging.info(u'Клиент отключился')
                         fd.close()
                         sys.exit(0)
-                    #self._read_client2send_nucleus()
+                # Данные от ядра для пользователя
                 elif fd == self._chanel2nucleus.socket:
-                    pass
-                    #self._read_nucleus2send_client()
-
+                    self._factory_method_nucleus.response(data)
+        sys.exit(0)
+                    
 

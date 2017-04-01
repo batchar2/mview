@@ -1,6 +1,7 @@
 import os
 import sys
 import uuid
+import signal
 import select
 import socket
 import logging
@@ -56,6 +57,10 @@ class Nucleus:
         :param unix_file_socket_path: путь до файлового сокета, через которого осуществляется обмен с нуклиентами
         """
         
+        # подтираем уничтоженные процессы       
+        signal.signal(signal.SIGCHLD, self._handle_sigchld)
+
+
         self._port, self._host = port, host
         self._DEBUG = debug or self._DEBUG
         self._unix_file_socket_path = unix_file_socket_path or self._unix_file_socket_path
@@ -75,6 +80,11 @@ class Nucleus:
         self._init_tcp_listen_socket()
         self._init_chanel2clients_socket()
         self._init_action_nucleus_packet()
+
+
+    def _handle_sigchld(self, signum, frame):
+        """ Подтверждаем закрытие процесса """
+        pid, sts = os.waitpid(-1, os.WNOHANG)
 
 
     def _init_tcp_listen_socket(self):
@@ -125,22 +135,27 @@ class Nucleus:
                     
                     self._create_chanel_client2nucleus(unix_socket=fd)
                 else:
-                    """ Обработка данных от клиенских процессов   """
-                    logging.info('Ядро <-- Клиент')
-                    data = fd.recv(packet_size)
-                    if data:
-                        """ Получаю и парсю данные от клиенского процесса. Вызывается соответствующий обработчик """
-                        logging.info('Ядро <-- Клиент')
-                        self._factory_method.response(data)
-                    else:
-                        logging.info('Клиенский процесс отключился')
-                        fd.close()
-                        # Костыльчик, УБРАТЬ!!!!
-                        sockets = []
-                        for f in self._clients_unix:
-                            if f != fd:
-                                sockets.append(fd)
-                        self._clients_unix = sockets
+                   self._response_client(client=fd, packet_size=packet_size)
+
+
+
+    def _response_client(self, *, client, packet_size):
+        """ Обработка данных от клиенских процессов   """
+
+        logging.info('Ядро <-- Клиент')
+        data = client.recv(packet_size)
+        if data:
+            """ Получаю и парсю данные от клиенского процесса. Вызывается соответствующий обработчик """
+            self._factory_method.response(data)
+        else:
+            logging.info('Клиенский процесс отключился')
+            client.close()
+            # Костыльчик, УБРАТЬ!!!!
+            sockets = []
+            for fd in self._clients_unix:
+                if client != fd:
+                    sockets.append(fd)
+            self._clients_unix = sockets
 
 
 
@@ -151,16 +166,18 @@ class Nucleus:
 
         logging.info('Подключен клиент {0}'.format(addr))
 
-        pid = os.fork()
-        if pid == 0:
-            client = NuClient(tcp_socket=client_socket, 
-                                    file_chanel2nucleus=self._unix_file_socket_path,
-                                    settings=self.settings)
-            client()
-            sys.exit(0)
+        try:
+            pid = os.fork()
+            if pid == 0:
+                client = NuClient(tcp_socket=client_socket, 
+                                        file_chanel2nucleus=self._unix_file_socket_path,
+                                        settings=self.settings)
+                client()
+        except BlockingIOError as e:
+            logging.error('Ошибка при создании нового процесса: {0}'.format(e))
+        else:
+            logging.info('Создан новый процесс pid={0}'.format(pid))
         
-        logging.info('Создан новый процесс pid={0}'.format(pid))
-
 
     def _create_chanel_client2nucleus(self, *, unix_socket):
         """ Создается канал связи клиенский процесс-ядро системы """

@@ -92,5 +92,6 @@ class Client:
         self._sock.close()
 
 if __name__ == '__main__':
-    client = Client()
-    client()
+    while True:
+        client = Client()
+        client()

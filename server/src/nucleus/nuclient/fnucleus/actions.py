@@ -7,30 +7,30 @@ from abc import ABC, abstractmethod
 from netpackets import chanel
 from netpackets import nucleus
 
-class Action(ABC):
-    """ Класс "команда", реализует вызов функции. Используется для связи с клиентом """
-    _related_object = None 
-    
+
+from factory.base_action import BaseAction
+
+
+class ActionNormal(BaseAction):
     def __init__(self, *, related_object=None):
-        """
-        Конструктор класса, реализует логику обработки пакета
-        :param related_object: Ссылка на связанный объект, через который происходит обмен с ядром 
-        """
-        self._related_object = related_object
-
+        super(ActionNormal, self).__init__(related_object=related_object)
 
     def __call__(self, *, packet=None):
-        """
-        Вызывается где-то. Таким оразом разделяем логику работу 
-        :param packet: тело пакета    
-        """
-        pass
+        logging.info('Получен пакет от ядра системы пользовательским процессом')
 
 
 
-class NucleusAuthResponse(Action):
-        def __init__(self, *, related_object=None):
-        super(NucleusAuthResponse, self).__init__(related_object=related_object)
+class ActionAuthResponseSucess(BaseAction):
+    def __init__(self, *, related_object=None):
+        super(ActionAuthResponseSucess, self).__init__(related_object=related_object)
 
     def __call__(self, *, packet=None):
-        logging.info('Получен пакет от ядра системы')
+        logging.info('Удачная авторизация')
+
+
+class ActionAuthResponseFail(BaseAction):
+    def __init__(self, *, related_object=None):
+        super(ActionAuthResponseFail, self).__init__(related_object=related_object)
+
+    def __call__(self, *, packet=None):
+        logging.info('не удачная авторизация')
