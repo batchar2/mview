@@ -1,4 +1,5 @@
 import os
+import sys
 import uuid
 import select
 import socket
@@ -65,6 +66,17 @@ class Nucleus:
         
         self._init_tcp_listen_socket()
         self._init_chanel2clients_socket()
+
+
+    def _add_packets_header_to_path(self, path):
+        """
+        Добавляю пакет с описанием расположения заголовков пакетов в пути импорта
+        """
+        abspath = os.path.abspath(path)
+
+        sys.path.append(abspath)
+
+
 
 
     def _init_tcp_listen_socket(self):

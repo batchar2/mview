@@ -1,11 +1,8 @@
 import ctypes
 
-from . import options as op
 """
 Протокол коммуникации клиенских процессов и ядра
 """
-
-from .. import options as base_options
 
 class NuPacket(ctypes.LittleEndianStructure):
     """ Базовый пакет, необходимый для идентификации типа пакета ядром сиситемы """
@@ -32,8 +29,8 @@ class NuPacketRequestAuth(ctypes.LittleEndianStructure):
         ('length_username', ctypes.c_ushort),
         ('length_password', ctypes.c_ushort),
         # Тело сообщения (Логин и пароль в зашифрованом виде)
-        ('username', ctypes.c_ubyte * base_options.LOGIN_SIZE),
-        ('password', ctypes.c_ubyte * base_options.PASSWORD_SIZE),
+        #('username', ctypes.c_ubyte * base_options.LOGIN_SIZE),
+        #('password', ctypes.c_ubyte * base_options.PASSWORD_SIZE),
     ]
 
 class NuPacketResponseAuth(ctypes.LittleEndianStructure):

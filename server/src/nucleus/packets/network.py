@@ -1,7 +1,9 @@
 import ctypes
 
 
-
+"""
+Описание пакетов сетевого уровня
+"""
 
 class NetworPacket(ctypes.LittleEndianStructure):
     """ Пакет сетевого обмена информации """

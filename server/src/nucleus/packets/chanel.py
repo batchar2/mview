@@ -2,9 +2,11 @@ import ctypes
 
 from abc import ABCMeta, abstractmethod
 
-from .options import CHANEL_PACKET_BODY_SIZE, CHANEL_PACKET_AUTH_BODY_SIZE
 
-#from .. import options
+"""
+Описание структуры сетевых пакетов канального уровня
+"""
+
 
 class BaseChanelLevelPacket(ctypes.LittleEndianStructure):
     """ Структура пакета канального уровня. 
