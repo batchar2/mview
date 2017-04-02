@@ -13,7 +13,7 @@ class NetworkAuthMaker:
 		answer_packet = NetworkMessage()
 		answer_packet.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
 		#answer_packet.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
-		answer_packet.type = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['TYPE_NOT_SECURE']
+		answer_packet.type = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PUBLIC_KEY_SERVER2CLIENT_SEND']
 		answer_packet.body = (ctypes.c_ubyte * ctypes.sizeof(packet)).from_buffer_copy(packet)
 
 		return answer_packet
