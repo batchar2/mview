@@ -19,6 +19,7 @@ from .factory.method import FactoryMethod
 
 from .database import DataBase
 
+
 class Nucleus:
     """ Ядро системы, выполняет маршрутизацию сообщений между клиентами, 
             и впреспективе, между ядрами дургих систем (горизонтальное масштабирование)
@@ -54,6 +55,8 @@ class Nucleus:
     _active_client = None 
 
     _data_base = None
+
+
 
     def __init__(self, *, port, host, settings, debug=None, unix_file_socket_path=None):
         """ Конструктор класса

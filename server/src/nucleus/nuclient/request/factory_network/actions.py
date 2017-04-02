@@ -29,7 +29,7 @@ class ActionPacketAuth(BaseAction):
 
     def __call__(self, *, packet=None):
         logging.info('ActionPacketAuth')
-        # отдаю на проверку какой имено пакет авторизации пришел
+        # отдаю на обработку пакет авторизации
         self.related_object.auth_identity(data=packet.body)
         
 

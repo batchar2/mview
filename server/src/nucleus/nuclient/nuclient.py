@@ -7,20 +7,23 @@ import logging
 
 import netpackets
 
+# цепочки ответственные за оберку пакетов друг в друга
+from .response_pipeline.response_pipeline import ResponsePipeline
+from .response_pipeline import packet_maker 
+
 from settings import SETTINGS
 
 from factory.method import FactoryMethod
 
 # канальный уровень
-from .factory_chanel import actions as actions_chanel
-from .factory_chanel import creators as creators_chanel
+from .request.factory_chanel import actions as actions_chanel
+from .request.factory_chanel import creators as creators_chanel
 # сетевой
-from .factory_network import actions as actions_network
-from .factory_network import creators as creators_network 
+from .request.factory_network import actions as actions_network
+from .request.factory_network import creators as creators_network 
 # Транспортный уровень авторизациии
-from .factory_transport_auth import actions as auth_actions
-from .factory_transport_auth import creators as auth_creators
-
+from .request.factory_transport_auth import actions as auth_actions
+from .request.factory_transport_auth import creators as auth_creators
 
 class NuClient:
     """
@@ -40,6 +43,9 @@ class NuClient:
     # Фабричный метод авторизации
     _transport_auth_factory_actions = None
 
+    # Цепочки объязаностей для обертывания пакетов
+    _response_pipeline = None
+
     def __init__(self, *, tcp_socket, file_socket_name):
         """ Конструктор класса
         :param tcp_socket: tcp-сокет, созданный при установлении связи с клиентом. 
@@ -57,6 +63,23 @@ class NuClient:
         self._init_network_actions()
         # инициализирую обработчики пакетов транспортного уровня - авторизации
         self._init_transport_auth_actions()
+        # инициализирую цепочки, обертывающие нижестоящий пакет вышестоящим
+        self._init_pipeline_response()
+
+    def _init_pipeline_response(self):
+        self._pipeline_response = ResponsePipeline()
+        
+        send_key = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PUBLIC_KEY_SERVER2CLIENT_SEND']
+
+        # добавляю цепочку, отвечающую за ответ на прием ключа
+
+        print(packet_maker)
+        self._pipeline_response.add_pipeline(packet_type=send_key,
+            pipeline=[
+                packet_maker.network.NetworkAuthMaker(), 
+                packet_maker.chanel.ChanelNotSecureMaker(),
+            ],tail_action=self.send_client
+        )
 
 
     def _create_nucleus_socket(self, file_socket_name):
@@ -143,6 +166,23 @@ class NuClient:
         self._transport_auth_factory_actions.response(data)
 
 
+    def make_answer(self, *, packet_type, packet):
+        """ Вызывается событием, когда ему надо ответить клиенту. 
+        Благодаря цепочки объязаностей пакет оборачивается в другие пакеты
+        :param packet_type: Тип пакета (команда)
+        :param packet: сам пакет
+        """
+        self._pipeline_response.response(packet_type=packet_type, packet=packet)
+
+
+    def send_client(self, data):
+        """ Отправка данных клиенту
+        :param data: данные для отправки
+        """
+        logging.info('Нуклиент --> Клиент')
+        self._tcp_socket.send(data)
+
+
     def run(self):
         """ Запуск цикла обработки сообщений """
         packet_size = SETTINGS['PROTOCOLS']['PACKET_SIZE']
@@ -155,17 +195,30 @@ class NuClient:
             # Жду прихода данных на один из дескипторов
             fd_reads, _, e = select.select(rfds, [], [])
             for fd in fd_reads:
-                # данные от пользователя по tcp-сокету
-                data = fd.recv(packet_size)
-                
-                if data:
-                    if fd == self._tcp_socket:
-                        self.chanel_identity(data=data)
-                    elif fd == self._nucleus_file_socket:
-                        pass
-                else:
+                try:
+                    # данные от пользователя по tcp-сокету
+                    data = fd.recv(packet_size)
+                    
+                    if data:
+                        if fd == self._tcp_socket:
+                            logging.info('Нуклиент <-- Клиент')
+                            self.chanel_identity(data=data)
+                        elif fd == self._nucleus_file_socket:
+                            pass
+                    else:
+                        self._tcp_socket.close()
+                        self._nucleus_file_socket.close()
+                        sys.exit(0)
+                except ConnectionResetError as e:
                     self._tcp_socket.close()
-                    self._nucleus_file_socket.close()
-                    sys.exit(0)
-        
+                    self._nucleus_file_socket.close()    
+                    sys.exit()
+            
         sys.exit(0)
+
+
+
+"""
+переадем пакет и идентификатор
+по идентификатору определяет родительский
+"""
