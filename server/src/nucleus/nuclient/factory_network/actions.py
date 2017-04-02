@@ -20,8 +20,7 @@ class ActionPacketRoute(BaseAction):
 
     def __call__(self, *, packet=None):
         logging.info('ActionPacketRoute')
-        return packet
-
+        
 
 class ActionPacketAuth(BaseAction):
     """  Пакет авторизации """
@@ -30,7 +29,9 @@ class ActionPacketAuth(BaseAction):
 
     def __call__(self, *, packet=None):
         logging.info('ActionPacketAuth')
-        return packet
+        # отдаю на проверку какой имено пакет авторизации пришел
+        self.related_object.auth_identity(data=packet.body)
+        
 
 
 class ActionPacketQOS(BaseAction):
@@ -40,4 +41,4 @@ class ActionPacketQOS(BaseAction):
 
     def __call__(self, *, packet=None):
         logging.info('ActionPacketQOS')
-        return packet
+        

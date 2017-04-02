@@ -9,7 +9,7 @@ from io import BytesIO
 #from nucleus.nuclient.fchanel.netpackets import chanel as ch
 #from nucleus.nuclient.fchanel.netpackets import options as op
 
-from nucleus.netpackets import chanel, network
+from nucleus.netpackets import chanel, network, transport_auth
 
 
 from nucleus.settings import SETTINGS
@@ -55,9 +55,21 @@ class Client:
 
         print("packet_network size={0}".format( ctypes.sizeof(packet_network)))
 
+       
+        
+        packet_transport = transport_auth.PacketKeyAuth()
+        packet_transport.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet_transport.type = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PUBLIC_KEY_СLIENT2SERVER_SEND'] 
+        #packet_transport.key = 123
+
+        print("packet_transport size={0}".format( ctypes.sizeof(packet_transport)))
+
+
+        packet_network.body = (ctypes.c_ubyte * ctypes.sizeof(packet_transport)).from_buffer_copy(packet_transport)
+
+
         packet_chanel.body = (ctypes.c_ubyte * ctypes.sizeof(packet_network)).from_buffer_copy(packet_network)
 
-        
         self._sock.send(packet_chanel)
         """
         # передача серверу открытого ключа клиента

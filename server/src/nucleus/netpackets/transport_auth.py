@@ -15,6 +15,8 @@ class BasePacketAuth(ctypes.LittleEndianStructure):
         ('magic_number', ctypes.c_ushort),
         ('version', ctypes.c_ubyte),
         ('type', ctypes.c_ubyte),
+        # заполнение буфера
+        ('tmp', ctypes.c_ubyte * (SETTINGS['PROTOCOLS']['NETWORK']['BODY_SIZE']-4)),
     ]
 
 
@@ -29,7 +31,9 @@ class PacketKeyAuth(ctypes.LittleEndianStructure):
         # размер ключа в поле
         ('length', ctypes.c_uint32, 32),
         # Ключ
-        ('key', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['KEY_SIZE'])
+        ('key', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['KEY_SIZE']),
+
+        ('tmp', ctypes.c_ubyte * (SETTINGS['PROTOCOLS']['NETWORK']['BODY_SIZE'] - 8 - SETTINGS['PROTOCOLS']['KEY_SIZE']))
     ]
 
 

@@ -11,11 +11,15 @@ from settings import SETTINGS
 
 from factory.method import FactoryMethod
 
+# канальный уровень
 from .factory_chanel import actions as actions_chanel
 from .factory_chanel import creators as creators_chanel
-
+# сетевой
 from .factory_network import actions as actions_network
 from .factory_network import creators as creators_network 
+# Транспортный уровень авторизациии
+from .factory_transport_auth import actions as auth_actions
+from .factory_transport_auth import creators as auth_creators
 
 
 class NuClient:
@@ -33,6 +37,8 @@ class NuClient:
     _chanel_factory_actions = None
     # Фабричный метод идентификации и обработки пакетов сетевого уровня
     _network_factory_actions = None
+    # Фабричный метод авторизации
+    _transport_auth_factory_actions = None
 
     def __init__(self, *, tcp_socket, file_socket_name):
         """ Конструктор класса
@@ -49,6 +55,8 @@ class NuClient:
         self._init_chanel_actions()
         # инициализирую обработчики пакетов сетевого уровня
         self._init_network_actions()
+        # инициализирую обработчики пакетов транспортного уровня - авторизации
+        self._init_transport_auth_actions()
 
 
     def _create_nucleus_socket(self, file_socket_name):
@@ -96,6 +104,24 @@ class NuClient:
                 cmd=actions_network.ActionPacketQOS(related_object=self))
 
 
+    def _init_transport_auth_actions(self):
+        self._transport_auth_factory_actions = FactoryMethod(base_class=netpackets.transport_auth.BasePacketAuth)
+
+        packet_type = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']
+
+        # клиент отправляет свой публичный ключ
+        self._transport_auth_factory_actions.addAction(packet_type=packet_type['PUBLIC_KEY_СLIENT2SERVER_SEND'], 
+                concrete_factory=auth_creators.TransportAuthGetPublicKeyCreator(), 
+                cmd=auth_actions.ActionTransportAuthGetPublicKey(related_object=self))
+        # клиент отправляет сессионый ключ
+        self._transport_auth_factory_actions.addAction(packet_type=packet_type['SESSION_PRIVATE_KEY'], 
+                concrete_factory=auth_creators.TransportAuthGetSessionKeyCreator(), 
+                cmd=auth_actions.ActionTransportAuthGetSessionKey(related_object=self))
+        # клиент отправляет данные пользователя(логин и пароль)
+        self._transport_auth_factory_actions.addAction(packet_type=packet_type['PACKET_TYPE_AUTORIZATION'], 
+                concrete_factory=auth_creators.TransportAuthUserRequestCreator(), 
+                cmd=auth_actions.ActionTransportAuthGetLoginPassword(related_object=self))
+
     def chanel_identity(self, *, data):
         """ Запускает фабрику идентификации канального пакета 
         :param data: данные принятые по сети
@@ -108,6 +134,13 @@ class NuClient:
         :param data: данные для построения пакета сетевого уровня
         """
         self._network_factory_actions.response(data)
+
+
+    def auth_identity(self, *, data):
+        """ ХЗапускает фабрику идентификации пакета авторизации
+        :param data: данные для построения пакета авторизации
+        """
+        self._transport_auth_factory_actions.response(data)
 
 
     def run(self):
