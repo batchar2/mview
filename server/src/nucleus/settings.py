@@ -35,11 +35,11 @@ SETTINGS =  {
                 # магичесоке число для верификации и отличия от муссора
                 'PACKET_VERSION': 1,
                 # пакет зашифрован открытым ключем сервера
-                'PACKET_SECURE_PUBLIC_KEY': 1,
+                'TYPE_SECURE_PUBLIC_KEY': 1,
                 # пакет зашифрован симметричным ключем
-                'PACKET_SECURE_SIMMETRIC_KEY': 2,
+                'TYPE_SECURE_SIMMETRIC_KEY': 2,
                 # пакет не зашифрован (применяется только при обмене ключами)
-                'PACKET_NOT_SECURE': 3,
+                'TYPE_NOT_SECURE': 3,
             }
         },
         'CHANEL_NUCLEUS': {
@@ -48,7 +48,7 @@ SETTINGS =  {
             'PROTOCOL': {
                 # магичесоке число для верификации и отличия от муссора
                 'PACKET_VERSION': 1,
-                'PACKET_NOT_SECURE': 4,
+                'TYPE_NOT_SECURE': 4,
             },
         },
         'NETWORK': {

@@ -4,13 +4,15 @@ import ctypes
 import logging
 from settings import SETTINGS
 
-from netpackets import chanel
-
 
 class FactoryMethod:
     """  Интерфейс, определяющий конструирование пакетов. Работа производится через него. Некий фасад  """
     
-    def __init__(self):
+    def __init__(self, *, base_class):
+        """ Конструктор класса 
+        :param base_class_name: передается ссылка на класс, по которому определяется тип пакета
+        """
+        self._base_class = base_class
         self._packets_creators = {}
 
     def addAction(self, *, packet_type, concrete_factory, cmd):
@@ -31,7 +33,7 @@ class FactoryMethod:
         """
         try:
             # выполняем преобразование данных в пакет БАЗОВОГО ФОРМАТА, для идентификации
-            packet = chanel.BaseChanelLevelPacket.from_buffer_copy(data)
+            packet = self._base_class.from_buffer_copy(data)
         except Exception as e:
             logging.error(str(e))
             return None

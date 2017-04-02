@@ -10,5 +10,5 @@ class NetworkMessage(ctypes.LittleEndianStructure):
         # Тип пакета: авторизационный, обменный, QOS
         ('type', ctypes.c_ubyte),
         # тело сообщения
-        ('body', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['UUID_SIZE'])
+        ('body', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['NETWORK']['BODY_SIZE'])
     ]

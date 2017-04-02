@@ -9,7 +9,7 @@ from io import BytesIO
 #from nucleus.nuclient.fchanel.netpackets import chanel as ch
 #from nucleus.nuclient.fchanel.netpackets import options as op
 
-from nucleus.netpackets import chanel
+from nucleus.netpackets import chanel, network
 
 
 from nucleus.settings import SETTINGS
@@ -39,6 +39,27 @@ class Client:
         self.send_public_key()
 
     def send_public_key(self):
+        packet_chanel = chanel.ChanelPacket()
+        packet_chanel.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet_chanel.type  = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['TYPE_NOT_SECURE']
+        packet_chanel.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
+
+        print("packet_chanelt size={0}".format( ctypes.sizeof(packet_chanel)))
+
+        print('-' * 10)
+        print('Формирую пакет для отправки открытого ключа')
+
+        packet_network = network.NetworkMessage()
+        packet_network.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet_network.type = SETTINGS['PROTOCOLS']['NETWORK']['PROTOCOL']['TYPE_AUTHORIZATION']
+
+        print("packet_network size={0}".format( ctypes.sizeof(packet_network)))
+
+        packet_chanel.body = (ctypes.c_ubyte * ctypes.sizeof(packet_network)).from_buffer_copy(packet_network)
+
+        
+        self._sock.send(packet_chanel)
+        """
         # передача серверу открытого ключа клиента
         print('-' * 10)
         print('Передаем открытый ключ клиента')
@@ -110,7 +131,7 @@ class Client:
             print("Не верный логин или пароль")
 
         self._sock.close()
-
+        """
 if __name__ == '__main__':
     #while True:
     client = Client()

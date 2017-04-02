@@ -13,7 +13,7 @@ import creators
 
 from .nuclient.nuclient import NuClient
 from .settings import SETTINGS
-from .netpackets import nucleus
+#from .netpackets import nucleus
 from .factory.method import FactoryMethod
 
 
@@ -85,7 +85,7 @@ class Nucleus:
         
         self._init_tcp_listen_socket()
         self._init_chanel2clients_socket()
-        self._init_action_nucleus_packet()
+        #self._init_action_nucleus_packet()
 
         self._data_base = DataBase()
 
@@ -193,10 +193,8 @@ class Nucleus:
         try:
             pid = os.fork()
             if pid == 0:
-                client = NuClient(tcp_socket=client_socket, 
-                                        file_chanel2nucleus=self._unix_file_socket_path,
-                                        settings=self.settings)
-                client()
+                client = NuClient(tcp_socket=client_socket, file_socket_name=self._unix_file_socket_path)
+                client.run()
         except BlockingIOError as e:
             logging.error('Ошибка при создании нового процесса: {0}'.format(e))
         else:

@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 from factory.base_action import BaseAction
 
-from netpackets import nucleus
+#from netpackets import nucleus
 
 """
 обработчик сообщений от клиенских процессов.

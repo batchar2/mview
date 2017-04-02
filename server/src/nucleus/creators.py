@@ -2,7 +2,7 @@ import ctypes
 import logging
 from abc import ABC, abstractmethod
 
-from netpackets import nucleus
+#from netpackets import nucleus
 
 from factory.base_creator import BaseCreator
 

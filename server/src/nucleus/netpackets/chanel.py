@@ -2,7 +2,7 @@ import ctypes
 
 from settings import SETTINGS
 
-class ChanelLevelPacket(ctypes.LittleEndianStructure):
+class ChanelPacket(ctypes.LittleEndianStructure):
     """ Структура пакета канального уровня. В него оборачиваются все остальные пакеты
     Тип идентифицирует: шифрованое или нет сообщение
     """
