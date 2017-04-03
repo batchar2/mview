@@ -8,22 +8,22 @@ import logging
 import netpackets
 
 # цепочки ответственные за оберку пакетов друг в друга
-from .response_pipeline.response_pipeline import ResponsePipeline
-from .response_pipeline import packet_maker 
+from response.response import Response
+from response import packet_maker 
 
 from settings import SETTINGS
 
 from factory.method import FactoryMethod
 
 # канальный уровень
-from .request.factory_chanel import actions as actions_chanel
-from .request.factory_chanel import creators as creators_chanel
+from request.factory_chanel import actions as actions_chanel
+from request.factory_chanel import creators as creators_chanel
 # сетевой
-from .request.factory_network import actions as actions_network
-from .request.factory_network import creators as creators_network 
+from request.factory_network import actions as actions_network
+from request.factory_network import creators as creators_network 
 # Транспортный уровень авторизациии
-from .request.factory_transport_auth import actions as auth_actions
-from .request.factory_transport_auth import creators as auth_creators
+from request.factory_transport_auth import actions as auth_actions
+from request.factory_transport_auth import creators as auth_creators
 
 class NuClient:
     """
@@ -67,7 +67,7 @@ class NuClient:
         self._init_pipeline_response()
 
     def _init_pipeline_response(self):
-        self._pipeline_response = ResponsePipeline()
+        self._pipeline_response = Response()
         
         get_public_key = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PUBLIC_KEY_SERVER2CLIENT_SEND']
         get_session_key = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS']
