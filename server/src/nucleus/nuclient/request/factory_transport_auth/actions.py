@@ -6,7 +6,7 @@ from cubytes import str2cubytes, cubutes2str
 
 from settings import SETTINGS
 
-from netpackets.transport_auth import PacketKeyAuth
+from netpackets.transport_auth import PacketKeyAuth, PacketUserResponseAuth
 """
 Обработчики транспортного протокола авторизации
 """
@@ -19,7 +19,7 @@ class ActionTransportAuthGetPublicKey(BaseAction):
         super().__init__(related_object=related_object)
 
     def __call__(self, *, packet=None):
-        logging.info('ActionPacketRoute')
+        logging.info('ActionTransportAuthGetPublicKey')
         client_public_key = packet.key
 
         protocols = SETTINGS['PROTOCOLS']
@@ -45,7 +45,7 @@ class ActionTransportAuthGetSessionKey(BaseAction):
         super().__init__(related_object=related_object)
 
     def __call__(self, *, packet=None):
-        logging.info('ActionPacketAuth')
+        logging.info('ActionTransportAuthGetSessionKey')
         
         protocols = SETTINGS['PROTOCOLS']
 
@@ -70,3 +70,17 @@ class ActionTransportAuthGetLoginPassword(BaseAction):
     def __call__(self, *, packet=None, cmd=None):
 
         logging.info('ActionTransportAuthGetLoginPassword')
+        protocols = SETTINGS['PROTOCOLS']
+
+        answer_packet = PacketUserResponseAuth()
+        
+        packet_type = protocols['TRANSPORT']['PROTOCOL']['AUTH']['PACKET_TYPE_AUTORIZATION_SUCCESS']
+        #packet_type = protocols['TRANSPORT']['PROTOCOL']['AUTH']['PACKET_TYPE_AUTORIZATION_FAIL']
+
+        #answer_packet.key = 'Публичный ключ сервера'
+        # Отправляю клиенту публичный ключ сервера, шифрую публичным ключем клиента
+        answer_packet.type = packet_type
+        answer_packet.magic_number = protocols['MAGIC_NUMBER']
+
+        self.related_object.make_answer(packet_type=packet_type, packet=answer_packet)
+        return packet

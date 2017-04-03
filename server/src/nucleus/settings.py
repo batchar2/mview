@@ -73,17 +73,17 @@ SETTINGS =  {
                     # В ответ сервер высылает свой открытый ключ (сервер --> клиент)
                     'PUBLIC_KEY_SERVER2CLIENT_SEND': 22,
                     # клиент высылает свой закрытый-симметричный ключ серверу. Зашифровано открытым ключем сервера (клиент --> сервер)
-                    'SESSION_PRIVATE_KEY': 5,
+                    'SESSION_PRIVATE_KEY': 23,
                     # сервер подтверждает получение ключа (сервер --> клиент)
-                    'PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS': 6,
+                    'PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS': 24,
                     # клиент пересылает свой логин и пароль для проведения авторизации (клиент --> сервер)
-                    'PACKET_TYPE_AUTORIZATION': 7,
+                    'PACKET_TYPE_AUTORIZATION': 25,
                     # Успешное завершение авторизации (сервер --> клиент)
-                    'PACKET_TYPE_AUTORIZATION_SUCCESS': 8,
+                    'PACKET_TYPE_AUTORIZATION_SUCCESS': 26,
                     # Авторизация провалилась, ответ (сервер --> клиент)
-                    'PACKET_TYPE_AUTORIZATION_FAIL': 9,
+                    'PACKET_TYPE_AUTORIZATION_FAIL': 27,
                     # Регистрация отправка пользователем своего логина и пароля
-                    'PACKET_TYPE_REGISTRSTION': 10,
+                    'PACKET_TYPE_REGISTRSTION': 28,
                     },
                 # транспортный маршрутизационный протокол
                 'ROUTE': {

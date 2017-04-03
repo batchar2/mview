@@ -71,7 +71,7 @@ class NuClient:
         
         get_public_key = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PUBLIC_KEY_SERVER2CLIENT_SEND']
         get_session_key = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS']
-
+        get_username_password = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PACKET_TYPE_AUTORIZATION_SUCCESS']
         # добавляю цепочку, отвечающую за ответ на прием ключа
 
 
@@ -84,6 +84,13 @@ class NuClient:
         )
         # прием сессионого ключа от сервера, отправляю подтверждение принятия
         self._pipeline_response.add_pipeline(packet_type=get_session_key,
+            pipeline=[
+                packet_maker.network.NetworkAuthMaker(), 
+                packet_maker.chanel.ChanelNotSecureMaker(),
+            ],tail_action=self.send_client
+        )
+        # ответчаем пользователю о статусе авторизации
+        self._pipeline_response.add_pipeline(packet_type=get_username_password,
             pipeline=[
                 packet_maker.network.NetworkAuthMaker(), 
                 packet_maker.chanel.ChanelNotSecureMaker(),

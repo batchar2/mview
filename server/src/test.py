@@ -36,26 +36,39 @@ class Client:
         self._sock.connect(('localhost', 9988))
         
     def __call__(self):
+        username = 'user1'
+        password = 'password'
+        # отправляем публичный ключ
         self.send_public_key()
+        # принимаю публичный ключ сервера
         self.get_server_public_key()
+        # отправляю сессионый ключ
         self.send_session_key()
+        # жду подтверждения принятия сессионого ключа
+        self.get_answer_session_key()
+        # отправляю логин и пароль пользователя
+        self.send_username_password(username, password)
+        # жду ответа о статусе авторизации от сервера
+        self.get_auth_packet()
 
     def send_public_key(self):
+        print('-' * 10)
+        print('Формирую пакет для отправки открытого ключа')
         packet_chanel = chanel.ChanelPacket()
         packet_chanel.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
         packet_chanel.type  = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['TYPE_NOT_SECURE']
         packet_chanel.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
 
-        print("packet_chanelt size={0}".format( ctypes.sizeof(packet_chanel)))
+        #print("packet_chanelt size={0}".format( ctypes.sizeof(packet_chanel)))
 
-        print('-' * 10)
-        print('Формирую пакет для отправки открытого ключа')
+        #print('-' * 10)
+        
 
         packet_network = network.NetworkMessage()
         packet_network.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
         packet_network.type = SETTINGS['PROTOCOLS']['NETWORK']['PROTOCOL']['TYPE_AUTHORIZATION']
 
-        print("packet_network size={0}".format( ctypes.sizeof(packet_network)))
+        #print("packet_network size={0}".format( ctypes.sizeof(packet_network)))
 
        
         
@@ -64,19 +77,22 @@ class Client:
         packet_transport.type = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PUBLIC_KEY_СLIENT2SERVER_SEND'] 
         #packet_transport.key = 123
 
-        print("packet_transport size={0}".format( ctypes.sizeof(packet_transport)))
+        #print("packet_transport size={0}".format( ctypes.sizeof(packet_transport)))
 
 
-        packet_network.body = (ctypes.c_ubyte * ctypes.sizeof(packet_transport)).from_buffer_copy(packet_transport)
-        packet_chanel.body = (ctypes.c_ubyte * ctypes.sizeof(packet_network)).from_buffer_copy(packet_network)
+        packet_network.set_body(packet_transport)
+        packet_chanel.set_body(packet_network)
+        #packet_network.body = (ctypes.c_ubyte * ctypes.sizeof(packet_transport)).from_buffer_copy(packet_transport)
+        #packet_chanel.body = (ctypes.c_ubyte * ctypes.sizeof(packet_network)).from_buffer_copy(packet_network)
 
         self._sock.send(packet_chanel)
 
     def get_server_public_key(self):
-        
+        print('-' * 10)
+        print('Формирую пакет для приема открытого ключа')
         data = self._sock.recv(SETTINGS['PROTOCOLS']['PACKET_SIZE'])
         chanel_packet = chanel.ChanelPacket.from_buffer_copy(data)
-        print("NETWORK magic_number={0}".format(chanel_packet.magic_number))
+        #print("NETWORK magic_number={0}".format(chanel_packet.magic_number))
 
         packet_network = network.NetworkMessage.from_buffer_copy(chanel_packet.body)
         
@@ -84,123 +100,104 @@ class Client:
         if packet_network.type != SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PUBLIC_KEY_SERVER2CLIENT_SEND']:
             message = 'UNCOWN'
 
+        packet_transport = transport_auth.PacketKeyAuth.from_buffer_copy(packet_network.body)
+        
+
+    def send_session_key(self):
+        print('-' * 10)
+        print('Формирую пакет для отправки сессионого ключа')
+        packet_chanel = chanel.ChanelPacket()
+        packet_chanel.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet_chanel.type  = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['TYPE_NOT_SECURE']
+        packet_chanel.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
+
+        
+        #print('Формирую пакет для отправки открытого ключа')
+
+        packet_network = network.NetworkMessage()
+        packet_network.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet_network.type = SETTINGS['PROTOCOLS']['NETWORK']['PROTOCOL']['TYPE_AUTHORIZATION']
+
+        
+        packet_transport = transport_auth.PacketKeyAuth()
+        packet_transport.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
+        packet_transport.type = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['SESSION_PRIVATE_KEY'] 
+
+        packet_network.set_body(packet_transport)
+        packet_chanel.set_body(packet_network)
+
+        self._sock.send(packet_chanel)
+
+
+    def get_answer_session_key(self):
+        print('-' * 10)
+        print('Формирую пакет для приема ответа о успешности приема ключа сервером')
+        data = self._sock.recv(SETTINGS['PROTOCOLS']['PACKET_SIZE'])
+        chanel_packet = chanel.ChanelPacket.from_buffer_copy(data)
+        print("NETWORK magic_number={0}".format(chanel_packet.magic_number))
+
+        packet_network = network.NetworkMessage.from_buffer_copy(chanel_packet.body)
+        
+        message = 'PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS'
+        if packet_network.type != SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS']:
+            message = packet_network.type
+
 
         print("Принят пакет типа = {0}".format(message))
 
         packet_transport = transport_auth.PacketKeyAuth.from_buffer_copy(packet_network.body)
         
         print("packet_transport magic_number={0}".format(packet_transport.magic_number))
+        
 
-    def send_session_key(self):
+    def send_username_password(self, username, password):
+        print('-' * 10)
+        print('Формирую пакет для отправки логина и пароля')
         packet_chanel = chanel.ChanelPacket()
         packet_chanel.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
         packet_chanel.type  = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['TYPE_NOT_SECURE']
         packet_chanel.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
 
-        print("packet_chanelt size={0}".format( ctypes.sizeof(packet_chanel)))
-
-        print('-' * 10)
-        print('Формирую пакет для отправки открытого ключа')
-
         packet_network = network.NetworkMessage()
         packet_network.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
         packet_network.type = SETTINGS['PROTOCOLS']['NETWORK']['PROTOCOL']['TYPE_AUTHORIZATION']
 
-        print("packet_network size={0}".format( ctypes.sizeof(packet_network)))
-
-       
-        
-        packet_transport = transport_auth.PacketKeyAuth()
+        packet_transport = transport_auth.PacketUserRequestAuth()
         packet_transport.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
-        packet_transport.type = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['SESSION_PRIVATE_KEY'] 
-        #packet_transport.key = 123
+        packet_transport.type = SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PACKET_TYPE_AUTORIZATION'] 
+        packet_transport.set_username(username=username)
+        packet_transport.set_password(password=password)
 
-        print("packet_transport size={0}".format( ctypes.sizeof(packet_transport)))
+        packet_network.set_body(packet_transport)
+        packet_chanel.set_body(packet_network)
 
-
-        packet_network.body = (ctypes.c_ubyte * ctypes.sizeof(packet_transport)).from_buffer_copy(packet_transport)
-        packet_chanel.body = (ctypes.c_ubyte * ctypes.sizeof(packet_network)).from_buffer_copy(packet_network)
 
         self._sock.send(packet_chanel)
-        #print("length={0}".format(packet.length))
-        
-        #print("key={0}".format(packet.key))
 
 
-        """
-        # передача серверу открытого ключа клиента
+    def get_auth_packet(self):
         print('-' * 10)
-        print('Передаем открытый ключ клиента')
-        packet = chanel.ChanelLevelPacketKeyAuth()
-        packet.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
-        packet.type = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_PUBLIC_KEY_СLIENT_SERVER_EXCHANGE']
-        packet.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
-        
-        print("Data size={0}".format( ctypes.sizeof(packet)))
-        self._sock.send(packet)
+        print('ловлю статус авторизации клиента')
 
-        # Жду ответ от сервера с его открытым ключем
-        print('-' * 10)
-        print('Принимаем открытый ключ сервера')
         data = self._sock.recv(SETTINGS['PROTOCOLS']['PACKET_SIZE'])
-        packet = chanel.ChanelLevelPacketKeyAuth.from_buffer_copy(data)
-        print("magic_number={0}".format(packet.magic_number))
-        print("length={0}".format(packet.length))
-        #print("key={0}".format(packet.key))
+        chanel_packet = chanel.ChanelPacket.from_buffer_copy(data)
+        print("NETWORK magic_number={0}".format(chanel_packet.magic_number))
 
-        # Передача серверу зарытый ключ
-        print('-' * 10)
-        print('Передаем закрытый ключ для симетричного шифрования')
-        packet = chanel.ChanelLevelPacketKeyAuth()
-        packet.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
-        packet.type = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_PRIVATE_KEY_EXCHANGE'] 
+        packet_network = network.NetworkMessage.from_buffer_copy(chanel_packet.body)
         
-        print("Data size={0}".format( ctypes.sizeof(packet)))
-        self._sock.send(packet)
+        message = 'PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS'
+        if packet_network.type != SETTINGS['PROTOCOLS']['TRANSPORT']['PROTOCOL']['AUTH']['PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS']:
+            message = packet_network.type
 
-        # Ждем ответа о принятии ключа
-        print('-' * 10)
-        print('Ждем подтверждения принятия ключа')
-        data = self._sock.recv(SETTINGS['PROTOCOLS']['PACKET_SIZE'])
-        packet = chanel.ChanelLevelPacketKeyAuth.from_buffer_copy(data)
-        print("ответ: {0} == {1}".format(packet.type, SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_PRIVATE_KEY_EXCHANGE_SUCCESS']))
-        print("magic_number={0}".format(packet.magic_number))
-        print("length={0}".format(packet.length))
-        #print("key={0}".format(packet.key))
+
+        print("Принят пакет типа = {0}".format(message))
+
+        packet_transport = transport_auth.PacketUserResponseAuth.from_buffer_copy(packet_network.body)
         
-        #while True:
-            
-        # Отправляю свои данные - логин и пароль
-        packet = chanel.ChanelLevelPacketUserAuth()
-        packet.magic_number = SETTINGS['PROTOCOLS']['MAGIC_NUMBER']
-        packet.type =  SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_AUTORIZATION']
-        packet.version = SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_VERSION']
-         # УБРАТЬ, сделано для тестов !!!!
-        #str2cubytes = lambda s, size: ctypes.cast(s, ctypes.POINTER(ctypes.c_ubyte * size))[0]
-        username = str2cubytes('username', SETTINGS['PROTOCOLS']['LOGIN_SIZE'])
-        password = str2cubytes('password', SETTINGS['PROTOCOLS']['PASSWORD_SIZE'])
+        print("packet_transport magic_number={0}".format(packet_transport.magic_number))
+
         
-        packet.username = username
-        packet.password = password
-
-        u = str2cubytes('username', SETTINGS['PROTOCOLS']['LOGIN_SIZE'])
-        print("user_name=", cubutes2str(u))
-        print("Data size={0}".format( ctypes.sizeof(packet)))
-        self._sock.send(packet)
-
-
-        print('-' * 10)
-        print('Жду подтверждения авторизации')
-        data = self._sock.recv(SETTINGS['PROTOCOLS']['PACKET_SIZE'])
-        packet = chanel.ChanelLevelPacketKeyAuth.from_buffer_copy(data)
-        if packet.type == SETTINGS['PROTOCOLS']['CHANEL']['PROTOCOL']['PACKET_TYPE_AUTORIZATION_SUCCESS']:
-            print("УСПЕШНАЯ АВТОРИЗАЦИЯ")
-        else:
-            print("Не верный логин или пароль")
-
-        self._sock.close()
-        """
 if __name__ == '__main__':
-    while True:
-        client = Client()
-        client()
+    #while True:
+    client = Client()
+    client()

@@ -2,6 +2,9 @@ import ctypes
 
 from settings import SETTINGS
 
+from cubytes import str2cubytes, cubutes2str
+
+
 """
 Транспортный протокол: авторизация.
 Служит для обработкии сообщений авторизации: получение ключей и прочее
@@ -33,8 +36,11 @@ class PacketKeyAuth(ctypes.LittleEndianStructure):
         # Ключ
         ('key', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['KEY_SIZE']),
 
-        ('tmp', ctypes.c_ubyte * (SETTINGS['PROTOCOLS']['NETWORK']['BODY_SIZE'] - 8 - SETTINGS['PROTOCOLS']['KEY_SIZE']))
+        ('tmp', ctypes.c_ubyte * (SETTINGS['PROTOCOLS']['NETWORK']['BODY_SIZE'] - 8 - SETTINGS['PROTOCOLS']['KEY_SIZE'])),
     ]
+
+    def set_key(self, *, key):
+        self.key = (ctypes.c_ubyte * ctypes.sizeof(self.key)).from_buffer_copy(key)
 
 
 class PacketUserRequestAuth(ctypes.LittleEndianStructure):
@@ -49,7 +55,15 @@ class PacketUserRequestAuth(ctypes.LittleEndianStructure):
         # Тело сообщения (Логин и пароль в зашифрованом виде)
         ('username', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['LOGIN_SIZE']),
         ('password', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['PASSWORD_SIZE']),
+
+        ('tmp', ctypes.c_ubyte * (SETTINGS['PROTOCOLS']['NETWORK']['BODY_SIZE'] - 4 - SETTINGS['PROTOCOLS']['LOGIN_SIZE'] - SETTINGS['PROTOCOLS']['PASSWORD_SIZE']))
     ]
+
+    def set_username(self, *, username):
+        self.username = str2cubytes(username, ctypes.sizeof(self.username))#(ctypes.c_ubyte * ctypes.sizeof(self.username)).from_buffer_copy(username)
+
+    def set_password(self, *, password):
+        self.password = str2cubytes(password, ctypes.sizeof(self.password))#(ctypes.c_ubyte * ctypes.sizeof(self.password)).from_buffer_copy(password)
 
 
 class PacketUserResponseAuth(ctypes.LittleEndianStructure):
@@ -66,4 +80,8 @@ class PacketUserResponseAuth(ctypes.LittleEndianStructure):
         ('user_id', ctypes.c_uint32, 32),
         # уникальный идентификатор сессии пользователя
         ('user_session_uid', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['UUID_SIZE']),
+
+
+        ('tmp', ctypes.c_ubyte * (SETTINGS['PROTOCOLS']['NETWORK']['BODY_SIZE'] - 8 - SETTINGS['PROTOCOLS']['UUID_SIZE'])),
     ]
+

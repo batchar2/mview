@@ -17,3 +17,6 @@ class ChanelPacket(ctypes.LittleEndianStructure):
         # Тело сообщения (может быть зашифровано)
         ('body', ctypes.c_ubyte * SETTINGS['PROTOCOLS']['CHANEL']['BODY_SIZE'])
     ]
+
+    def set_body(self, data):
+        self.body = (ctypes.c_ubyte * ctypes.sizeof(data)).from_buffer_copy(data)
