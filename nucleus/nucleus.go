@@ -2,8 +2,10 @@ package nucleus
 
 import (
     "fmt"
-    "net"
     "os"
+    "net"
+
+    "mview/nuclient"
 )
 
 type Nucleus struct {
@@ -12,22 +14,6 @@ type Nucleus struct {
     Debug bool
 }
 
-
-func (n *Nucleus) nuclient(conn net.Conn) {
-    
-    for {
-        buf := make([]byte, 1024)
-        //reqLen, err := conn.Read(buf)
-        _, err := conn.Read(buf)
-
-        if err != nil {
-            fmt.Println("Error reading:", err.Error())
-            conn.Close()
-            break
-        }
-        conn.Write([]byte("Message received."))
-    }
-}
 
 
 func (n *Nucleus) Start() bool {
@@ -46,7 +32,9 @@ func (n *Nucleus) Start() bool {
     for {
         conn, err := listenSocket.Accept()
         if err == nil {
-            go n.nuclient(conn)
+            client := nuclient.Nuclient{}
+            go client.Connection(conn)
+            //go n.nuclient(conn)
         }
     }
 
