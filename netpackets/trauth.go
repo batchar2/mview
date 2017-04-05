@@ -1,16 +1,14 @@
 package netpackets
 
 import (
-    "mview/conf"
+//    "mview/conf"
 )
 
-type NetworkPacketHeader struct {
+type BaseTransportAuth struct {
     Header PacketHeader
-    // Тело сообщения (может быть зашифровано)
-    body [conf.NETWORK_BODY_SZIE]byte
 }
 
-
+/*
 func (header *NetworkPacketHeader) SetBody(body [conf.NETWORK_BODY_SZIE] byte) {
     header.body = body
 }
@@ -18,3 +16,4 @@ func (header *NetworkPacketHeader) SetBody(body [conf.NETWORK_BODY_SZIE] byte) {
 func (header *NetworkPacketHeader) GetBody() [conf.NETWORK_BODY_SZIE] byte {
     return header.body
 }
+*/
