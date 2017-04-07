@@ -1,42 +1,47 @@
 package nucleus
 
-import (
-    "fmt"
-    "os"
-    "net"
+// Ядро сервера: Nucleus
 
-    "mview/nuclient"
+import (
+	"fmt"
+	"net"
+	"octopus/netpackets"
+	"octopus/nuclient"
 )
 
 type Nucleus struct {
-    Host string
-    Port string
-    Debug bool
+	// Параметры сервера
+	Host  string
+	Port  string
+	Debug bool
+
+	//chanelConnect chan net.Conn
 }
 
-
-
 func (n *Nucleus) Start() bool {
-    
-    if n.Debug == true {
-        fmt.Println("DEBUG: Port=" + n.Port)
-    }
+	// канал связи с горутиной принимающее подключение пользователей
+	var chanelConnect = make(chan net.Conn)
+	// канал для связи горутины пользователя с ядром системы
+	var chanelClient2Nucleus = make(chan netpackets.NetworkPacketHeader, 100)
 
-    listenSocket, err := net.Listen("tcp", n.Host+":"+n.Port)
-    if err != nil {
-        fmt.Println("Error listen!")
-        os.Exit(1)
-    }
-    defer listenSocket.Close()
+	// Создаем объект для осуществелния подключения пользователей (нуклиент)
+	var cleintConnect = connection{Host: n.Host, Port: n.Port, ConnectChanel: chanelConnect}
+	// Запускаем в горутине
+	go cleintConnect.Listen()
 
-    for {
-        conn, err := listenSocket.Accept()
-        if err == nil {
-            client := nuclient.Nuclient{}
-            go client.Connection(conn)
-            //go n.nuclient(conn)
-        }
-    }
-
-    return false
+	for {
+		select {
+		// получаем из канала сведенья о новом подключении пользователя
+		case conn := <-chanelConnect:
+			// Создаем объект который будет обслуживать связь с клиентом
+			client := nuclient.Nuclient{Connect: conn, ChanelNucleus: chanelClient2Nucleus}
+			// Запускаем обслуживание клиента в отдельной горутине
+			go client.Start()
+		// получаем от нуклиента пакет данных
+		case netPacket := <-chanelClient2Nucleus:
+			netPacket.GetMagicNumber()
+			fmt.Println("Получен пакет от нуклиента")
+		}
+	}
+	return true
 }

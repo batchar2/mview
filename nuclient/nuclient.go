@@ -1,25 +1,34 @@
 package nuclient
 
-
 import (
-    "fmt"
-    "net"
+	"fmt"
+	"net"
+	"octopus/conf"
+	"octopus/netpackets"
 )
 
 type Nuclient struct {
-
+	ChanelNucleus chan netpackets.NetworkPacketHeader
+	Connect       net.Conn
 }
 
-func (n *Nuclient) Connection(conn net.Conn) {
-    for {
-        buf := make([]byte, 1024)
-        _, err := conn.Read(buf)
+func (client *Nuclient) Start() {
+	defer client.Connect.Close()
+	for {
+		buf := make([]byte, conf.PACKET_SIZE)
 
-        if err != nil {
-            fmt.Println("Error reading:", err.Error())
-            conn.Close()
-            break
-        }
-        conn.Write([]byte("Message received."))
-    }
+		size, err := client.Connect.Read(buf)
+		if err != nil {
+			fmt.Println("Error reading")
+			break
+		} else {
+
+			netPacket := netpackets.NetworkPacketHeader{}
+
+			fmt.Print(string(buf))
+			fmt.Println("Получены данные размера:" + string(size))
+			client.ChanelNucleus <- netPacket
+			client.Connect.Write(buf)
+		}
+	}
 }
