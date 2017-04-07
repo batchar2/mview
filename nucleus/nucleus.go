@@ -24,17 +24,15 @@ func (n *Nucleus) Start() bool {
 	// канал для связи горутины пользователя с ядром системы
 	var chanelClient2Nucleus = make(chan netpackets.NetworkPacketHeader, 100)
 
-	// Создаем объект для осуществелния подключения пользователей (нуклиент)
-	var cleintConnect = connection{Host: n.Host, Port: n.Port, ConnectChanel: chanelConnect}
-	// Запускаем в горутине
-	go cleintConnect.Listen()
+	// Ждем подключения пользователей
+	go listen(n.Host, n.Port, chanelConnect)
 
 	for {
 		select {
 		// получаем из канала сведенья о новом подключении пользователя
 		case conn := <-chanelConnect:
 			// Создаем объект который будет обслуживать связь с клиентом
-			client := nuclient.Nuclient{Connect: conn, ChanelNucleus: chanelClient2Nucleus}
+			client := nuclient.Nuclient{Connect: conn, ChanelClient2Nucleus: chanelClient2Nucleus}
 			// Запускаем обслуживание клиента в отдельной горутине
 			go client.Start()
 		// получаем от нуклиента пакет данных
@@ -44,4 +42,24 @@ func (n *Nucleus) Start() bool {
 		}
 	}
 	return true
+}
+
+// Ожидает подключение удаленого клиента и в канале возвращает это подключение
+func listen(host string, port string, connectChanel chan<- net.Conn) {
+	listener, err := net.Listen("tcp", host+":"+port)
+	if err != nil {
+		return
+	}
+	defer listener.Close()
+
+	for {
+		// ждем подключение клиентов
+		connection, err := listener.Accept()
+		if err != nil {
+			fmt.Println("Error connection!")
+		} else {
+			// скидываем полученое подключение в канал
+			connectChanel <- connection
+		}
+	}
 }
