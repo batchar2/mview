@@ -14,5 +14,6 @@ func (header *ChanelPacketHeader) SetBody(body [conf.CHANEL_PACKET_BODY_SIZE]byt
 }
 
 func (header *ChanelPacketHeader) GetBody() [conf.CHANEL_PACKET_BODY_SIZE]byte {
+
 	return header.body
 }

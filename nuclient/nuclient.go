@@ -36,6 +36,9 @@ func (nuclient *Nuclient) Start() {
 		select {
 		// Получены данные от удаленного клиента
 		case chanelPacket := <-chanelClientToNuclient:
+
+			go nuclient.processingPacket(chanelPacket)
+
 			var magicNumber = chanelPacket.GetMagicNumber()
 			fmt.Println(magicNumber)
 			var packet = NucleusPacketHeader{}
@@ -56,23 +59,32 @@ func (nuclient *Nuclient) Start() {
 	}
 }
 
+// обработка пакета данных от удаленого пользователя
+func (nuclient *Nuclient) processingPacket(chanelPacket netpackets.ChanelPacketHeader) {
+
+}
+
 // Читаем данные из сокета
 func clientReadData(conn net.Conn, chanelData chan<- netpackets.ChanelPacketHeader, chanelIsConClose chan<- bool) {
 	for {
 		var buf = make([]byte, conf.PACKET_SIZE)
 		_, err := conn.Read(buf)
+
 		if err != nil {
 			fmt.Println("Сокет закрыт")
 			fmt.Print(err)
 			chanelIsConClose <- true
 			return
 		}
-		fmt.Print(string(buf))
 
-		// отдаем данные нуклиенту
+		// Произвожу парсинг данных: копирую в пакет
 		var packet = netpackets.ChanelPacketHeader{}
+		packet.ParseData(buf)
+
+		// Отличаю от мусорных данных и отпарвляю в канал на обработку нуклиенту
 		if packet.GetMagicNumber() == conf.MAGIC_NUMBER {
 			chanelData <- packet
 		}
+
 	}
 }

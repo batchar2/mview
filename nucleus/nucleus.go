@@ -5,7 +5,6 @@ package nucleus
 import (
 	"fmt"
 	"net"
-	//"octopus/netpackets"
 	"octopus/nuclient"
 
 	"github.com/satori/go.uuid"

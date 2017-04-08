@@ -1,8 +1,9 @@
 package netpackets
 
 import (
-	"bytes"
+	//"bytes"
 	"encoding/binary"
+	"fmt"
 )
 
 type PacketHeader struct {
@@ -38,7 +39,7 @@ func (header *PacketHeader) GetPacketType() uint8 {
 	return header.packetType
 }
 
-// преобразует массив данных в представление пакета
+/*
 func (header *PacketHeader) DataCopyPacket(data *bytes.Buffer) {
 
 	buf := data.Bytes()
@@ -50,4 +51,20 @@ func (header *PacketHeader) DataCopyPacket(data *bytes.Buffer) {
 	header.magicNumber = binary.BigEndian.Uint16(slMagicNumber)
 	//header.version = binary.BigEndian.Int8(slVersion)
 	//header.packetType = binary.BigEndian.Uint8(slPackeType)
+}
+*/
+// преобразует массив данных в представление пакета
+func (header *PacketHeader) ParseData(buf []byte) {
+	fmt.Printf("PARSE DATA size=%d\n", len(buf))
+	var slMagic = []byte{buf[0], buf[1]}
+	var slVersion = []byte{0, buf[2]}
+	var slPacketType = []byte{0, buf[3]}
+
+	var magicNumber = binary.BigEndian.Uint16(slMagic)
+	var packetVersion = binary.BigEndian.Uint16(slVersion)
+	var packetType = binary.BigEndian.Uint16(slPacketType)
+
+	header.SetMagicNumber(magicNumber)
+	header.SetProtocolVersion(uint8(packetVersion))
+	header.SetPacketType(uint8(packetType))
 }
