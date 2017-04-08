@@ -1,5 +1,7 @@
 package nuclient
 
+// Нуклиент - отдельная горутина, отвечающая за связь с удаленым сервером.
+
 import (
 	"fmt"
 	"net"
@@ -9,10 +11,14 @@ import (
 )
 
 type Nuclient struct {
-	// Канал связи между ядром и нуклиентом
-	ChanelClient2Nucleus chan netpackets.NetworkPacketHeader
+	// Канал связи между нуклиентом и ядром
+	ChanelClient2Nucleus chan NucleusPacketHeader
 	// Сетевое соединение между нуклиентом и удаленым клиентом
 	Connect net.Conn
+	// Прямой канал связи между ядром и нуклиентом
+	ChanelNucleus2Client chan NucleusPacketHeader
+	// уникальный идентификатор Нуклиента. Используется для опознавания ядром системы
+	NuclientUuid string
 }
 
 // Реализация взаимодействия между ядром системы и удаленым клиентом
@@ -32,9 +38,11 @@ func (nuclient *Nuclient) Start() {
 		case chanelPacket := <-chanelClientToNuclient:
 			var magicNumber = chanelPacket.GetMagicNumber()
 			fmt.Println(magicNumber)
-
-			var netPacket = netpackets.NetworkPacketHeader{}
-			nuclient.ChanelClient2Nucleus <- netPacket
+			var packet = NucleusPacketHeader{}
+			nuclient.ChanelClient2Nucleus <- packet
+		// Получены данные от ядра системы
+		case <-nuclient.ChanelNucleus2Client:
+			fmt.Println("Получены данные от ядра системы")
 		// информировнаие о закрытии соединения с удаленным клиентом
 		case <-chanelIsConClose:
 			return
@@ -61,8 +69,10 @@ func clientReadData(conn net.Conn, chanelData chan<- netpackets.ChanelPacketHead
 		}
 		fmt.Print(string(buf))
 
-		var packet = netpackets.ChanelPacketHeader{}
 		// отдаем данные нуклиенту
-		chanelData <- packet
+		var packet = netpackets.ChanelPacketHeader{}
+		if packet.GetMagicNumber() == conf.MAGIC_NUMBER {
+			chanelData <- packet
+		}
 	}
 }
