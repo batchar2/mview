@@ -59,7 +59,7 @@ func (nuclient *Nuclient) Start() {
 	}
 }
 
-// обработка пакета данных от удаленого пользователя
+// обработка пакета данных, полученый от удаленого пользователя
 func (nuclient *Nuclient) processingPacket(chanelPacket netpackets.ChanelPacketHeader) {
 
 }
@@ -77,9 +77,10 @@ func clientReadData(conn net.Conn, chanelData chan<- netpackets.ChanelPacketHead
 			return
 		}
 
-		// Произвожу парсинг данных: копирую в пакет
+		// Произвожу парсинг данных и строю пакет на основе этих данных
 		var packet = netpackets.ChanelPacketHeader{}
 		packet.ParseData(buf)
+		packet.SetBody(buf[3:])
 
 		// Отличаю от мусорных данных и отпарвляю в канал на обработку нуклиенту
 		if packet.GetMagicNumber() == conf.MAGIC_NUMBER {
