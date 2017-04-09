@@ -37,12 +37,12 @@ func (nuclient *Nuclient) Start() {
 		// Получены данные от удаленного клиента
 		case chanelPacket := <-chanelClientToNuclient:
 
-			go nuclient.processingPacket(chanelPacket)
+			go nuclient.processingChanelPacket(chanelPacket)
 
-			var magicNumber = chanelPacket.GetMagicNumber()
-			fmt.Println(magicNumber)
-			var packet = NucleusPacketHeader{}
-			nuclient.ChanelClient2Nucleus <- packet
+			//var magicNumber = chanelPacket.GetMagicNumber()
+			//fmt.Println(magicNumber)
+			//var packet = NucleusPacketHeader{}
+			//nuclient.ChanelClient2Nucleus <- packet
 		// Получены данные от ядра системы
 		case <-nuclient.ChanelNucleus2Client:
 			fmt.Println("Получены данные от ядра системы")
@@ -59,8 +59,8 @@ func (nuclient *Nuclient) Start() {
 	}
 }
 
-// обработка пакета данных, полученый от удаленого пользователя
-func (nuclient *Nuclient) processingPacket(chanelPacket netpackets.ChanelPacketHeader) {
+// обработка пакета данных, полученый от удаленого пользователя - канальный уровень
+func (nuclient *Nuclient) processingChanelPacket(chanelPacket netpackets.ChanelPacketHeader) {
 	fmt.Println("Приняли пакет на обработку")
 
 	var netPacket = netpackets.NetworkPacketHeader{}
@@ -69,8 +69,14 @@ func (nuclient *Nuclient) processingPacket(chanelPacket netpackets.ChanelPacketH
 	if netPacket.GetMagicNumber() != conf.MAGIC_NUMBER {
 		fmt.Println("Неверный магический номер")
 	} else {
-		fmt.Println("Верно!")
+		//fmt.Println("Верно!")
+		nuclient.processingNetworkPacket(netPacket)
 	}
+}
+
+// обработка пакета данных от пользователя - сетевой уровень
+func (nuclient *Nuclient) processingNetworkPacket(netPacket netpackets.NetworkPacketHeader) {
+
 }
 
 // Читаем данные из сокета

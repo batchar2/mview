@@ -6,4 +6,6 @@ const (
 	MAGIC_NUMBER uint16 = 32189
 	// Заркыть соединение по присшествию стольких секунда
 	CLOSE_CONNECTION_CLIENT_AFTER_SECONDS int = 5
+	// Размер уникального номера
+	UUID_SIZE = 40
 )

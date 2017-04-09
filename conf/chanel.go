@@ -4,7 +4,7 @@ const (
 	// версия протокола
 	CHANEL_PACKET_VERSION uint8 = 1
 	// размер поля пакета (складывается из общего размера минус размер полей пакета)
-	CHANEL_PACKET_BODY_SIZE uint = PACKET_SIZE - 8
+	CHANEL_PACKET_BODY_SIZE = PACKET_SIZE - 4
 
 	// пакет зашифрован открытым ключем сервера
 	CHANEL_PACKET_TYPE_SECURE_PUBLIC_KEY uint8 = 1
