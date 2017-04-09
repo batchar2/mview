@@ -10,10 +10,10 @@ type ChanelPacketHeader struct {
 }
 
 func (header *ChanelPacketHeader) SetBody(body []byte) {
-	copy(body, header.body[:])
+	copy(header.body[:], body)
 }
 
-func (header *ChanelPacketHeader) GetBody() [conf.CHANEL_PACKET_BODY_SIZE]byte {
+func (header *ChanelPacketHeader) GetBody() []byte {
 
-	return header.body
+	return header.body[:]
 }

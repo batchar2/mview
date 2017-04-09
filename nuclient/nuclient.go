@@ -61,7 +61,16 @@ func (nuclient *Nuclient) Start() {
 
 // обработка пакета данных, полученый от удаленого пользователя
 func (nuclient *Nuclient) processingPacket(chanelPacket netpackets.ChanelPacketHeader) {
+	fmt.Println("Приняли пакет на обработку")
 
+	var netPacket = netpackets.NetworkPacketHeader{}
+	netPacket.ParseData(chanelPacket.GetBody())
+
+	if netPacket.GetMagicNumber() != conf.MAGIC_NUMBER {
+		fmt.Println("Неверный магический номер")
+	} else {
+		fmt.Println("Верно!")
+	}
 }
 
 // Читаем данные из сокета
@@ -80,8 +89,8 @@ func clientReadData(conn net.Conn, chanelData chan<- netpackets.ChanelPacketHead
 		// Произвожу парсинг данных и строю пакет на основе этих данных
 		var packet = netpackets.ChanelPacketHeader{}
 		packet.ParseData(buf)
-		packet.SetBody(buf[3:])
-
+		packet.SetBody(buf[4:])
+		fmt.Println(buf)
 		// Отличаю от мусорных данных и отпарвляю в канал на обработку нуклиенту
 		if packet.GetMagicNumber() == conf.MAGIC_NUMBER {
 			chanelData <- packet

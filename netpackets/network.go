@@ -10,10 +10,10 @@ type NetworkPacketHeader struct {
 	body [conf.NETWORK_PACKET_BODY_SIZE]byte
 }
 
-func (header *NetworkPacketHeader) SetBody(body [conf.NETWORK_PACKET_BODY_SIZE]byte) {
-	header.body = body
+func (header *NetworkPacketHeader) SetBody(body []byte) {
+	copy(header.body[:], body)
 }
 
-func (header *NetworkPacketHeader) GetBody() [conf.NETWORK_PACKET_BODY_SIZE]byte {
-	return header.body
+func (header *NetworkPacketHeader) GetBody() []byte {
+	return header.body[:]
 }
