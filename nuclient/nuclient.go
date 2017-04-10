@@ -76,7 +76,16 @@ func (nuclient *Nuclient) processingChanelPacket(chanelPacket netpackets.ChanelP
 
 // обработка пакета данных от пользователя - сетевой уровень
 func (nuclient *Nuclient) processingNetworkPacket(netPacket netpackets.NetworkPacketHeader) {
-
+	fmt.Println("processingNetworkPacket")
+	// определяю по типу пакета его дальнейший обработчик
+	var packetType = netPacket.GetPacketType()
+	switch packetType {
+	// Пакет авторизации. Производим обработку
+	case conf.NETWORK_PACKET_TYPE_AUTH:
+		processingAuthPacket(nuclient, netPacket.GetBody())
+	case conf.NETWORK_PACKET_TYPE_NORMAL:
+	case conf.NETWORK_PACKET_TYPE_QOS:
+	}
 }
 
 // Читаем данные из сокета

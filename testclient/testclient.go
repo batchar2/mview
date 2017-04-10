@@ -11,12 +11,23 @@ import (
 
 func SendPackets() {
 	var chanelPacket = netpackets.ChanelPacketHeader{}
-	var netPacket = netpackets.NetworkPacketHeader{}
+	// Формирую пакет авторизации
+	var authPacket = netpackets.TransportAuthKeyPacketHeader{}
+	authPacket.SetMagicNumber(conf.MAGIC_NUMBER)
+	authPacket.SetPacketType(conf.TRANSPORT_AUTH_PACKET_TYPE_PUBLICKEY_СLIENT2SERVER_SEND)
+
+	var authPacketBuff = &bytes.Buffer{}
+	binary.Write(authPacketBuff, binary.BigEndian, authPacket)
+	fmt.Println(authPacketBuff.Bytes())
 
 	// Формирую сетевой пакет
+	var netPacket = netpackets.NetworkPacketHeader{}
+	netPacket.SetBody(authPacketBuff.Bytes())
+	netPacket.SetPacketType(conf.NETWORK_PACKET_TYPE_AUTH)
 	netPacket.SetMagicNumber(conf.MAGIC_NUMBER)
 	var netPacketBuff = &bytes.Buffer{}
 	binary.Write(netPacketBuff, binary.BigEndian, netPacket)
+
 	fmt.Println(netPacketBuff.Bytes())
 
 	//Формирую канальный пакет
