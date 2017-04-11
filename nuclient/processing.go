@@ -48,27 +48,3 @@ func (p *Processing) buildNetworkPacket(data []byte) (netpackets.NetworkPacketHe
 	}
 	return netPacket, nil
 }
-
-/*
-// обработка пакета данных, полученый от удаленого пользователя - канальный уровень
-func (nuclient *Processing) processingChanelPacket(chanelPacket netpackets.ChanelPacketHeader) {
-
-}
-
-// обработка пакета данных от пользователя - сетевой уровень
-func (nuclient *Processing) processingNetworkPacket(netPacket netpackets.NetworkPacketHeader) {
-	fmt.Println("processingNetworkPacket")
-	// определяю по типу пакета его дальнейший обработчик
-	var packetType = netPacket.GetPacketType()
-
-	fmt.Print("NETWORK BODY ")
-	fmt.Println(netPacket.GetBody())
-
-	switch packetType {
-	// Пакет авторизации. Производим обработку
-	case conf.NETWORK_PACKET_TYPE_AUTH:
-		processingAuthPacket(nuclient, netPacket.GetBody())
-	case conf.NETWORK_PACKET_TYPE_NORMAL:
-	case conf.NETWORK_PACKET_TYPE_QOS:
-	}
-}*/
