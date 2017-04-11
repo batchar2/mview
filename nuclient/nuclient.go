@@ -37,7 +37,8 @@ func (nuclient *Nuclient) Start() {
 		// Получены данные от удаленного клиента
 		case chanelPacket := <-chanelClientToNuclient:
 
-			go nuclient.processingChanelPacket(chanelPacket)
+			var processing = Processing{nuclient: nuclient}
+			go processing.Start(chanelPacket)
 
 			//var magicNumber = chanelPacket.GetMagicNumber()
 			//fmt.Println(magicNumber)
@@ -59,35 +60,6 @@ func (nuclient *Nuclient) Start() {
 	}
 }
 
-// обработка пакета данных, полученый от удаленого пользователя - канальный уровень
-func (nuclient *Nuclient) processingChanelPacket(chanelPacket netpackets.ChanelPacketHeader) {
-	fmt.Println("Приняли пакет на обработку")
-
-	var netPacket = netpackets.NetworkPacketHeader{}
-	netPacket.ParseData(chanelPacket.GetBody())
-
-	if netPacket.GetMagicNumber() != conf.MAGIC_NUMBER {
-		fmt.Println("Неверный магический номер")
-	} else {
-		//fmt.Println("Верно!")
-		nuclient.processingNetworkPacket(netPacket)
-	}
-}
-
-// обработка пакета данных от пользователя - сетевой уровень
-func (nuclient *Nuclient) processingNetworkPacket(netPacket netpackets.NetworkPacketHeader) {
-	fmt.Println("processingNetworkPacket")
-	// определяю по типу пакета его дальнейший обработчик
-	var packetType = netPacket.GetPacketType()
-	switch packetType {
-	// Пакет авторизации. Производим обработку
-	case conf.NETWORK_PACKET_TYPE_AUTH:
-		processingAuthPacket(nuclient, netPacket.GetBody())
-	case conf.NETWORK_PACKET_TYPE_NORMAL:
-	case conf.NETWORK_PACKET_TYPE_QOS:
-	}
-}
-
 // Читаем данные из сокета
 func clientReadData(conn net.Conn, chanelData chan<- netpackets.ChanelPacketHeader, chanelIsConClose chan<- bool) {
 	for {
@@ -103,9 +75,8 @@ func clientReadData(conn net.Conn, chanelData chan<- netpackets.ChanelPacketHead
 
 		// Произвожу парсинг данных и строю пакет на основе этих данных
 		var packet = netpackets.ChanelPacketHeader{}
-		packet.ParseData(buf)
-		packet.SetBody(buf[4:])
-		fmt.Println(buf)
+		packet.ParseBinaryData(buf)
+
 		// Отличаю от мусорных данных и отпарвляю в канал на обработку нуклиенту
 		if packet.GetMagicNumber() == conf.MAGIC_NUMBER {
 			chanelData <- packet

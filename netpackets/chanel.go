@@ -1,6 +1,9 @@
 package netpackets
 
 import (
+	"bytes"
+	"encoding/binary"
+	"fmt"
 	"octopus/conf"
 )
 
@@ -14,6 +17,20 @@ func (header *ChanelPacketHeader) SetBody(body []byte) {
 }
 
 func (header *ChanelPacketHeader) GetBody() []byte {
-
 	return header.body[:]
+}
+
+// метод реализует парсинг бинарного пакета в соответствующие загловки
+func (header *ChanelPacketHeader) ParseBinaryData(data []byte) bool {
+	fmt.Println(data)
+	header.parseData(data)
+	header.SetBody(data[4:])
+	return true
+}
+
+// переводит пакет в бинарное представление
+func (header *ChanelPacketHeader) Binary() []byte {
+	var authPacketBuff = &bytes.Buffer{}
+	binary.Write(authPacketBuff, binary.BigEndian, *header)
+	return authPacketBuff.Bytes()[:]
 }

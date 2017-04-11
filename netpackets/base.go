@@ -1,9 +1,7 @@
 package netpackets
 
 import (
-	//"bytes"
 	"encoding/binary"
-	"fmt"
 )
 
 type PacketHeader struct {
@@ -39,23 +37,8 @@ func (header *PacketHeader) GetPacketType() uint8 {
 	return header.packetType
 }
 
-/*
-func (header *PacketHeader) DataCopyPacket(data *bytes.Buffer) {
-
-	buf := data.Bytes()
-
-	slMagicNumber := []byte{buf[0], buf[1]}
-	//slVersion := []byte{buf[2]}
-	//slPackeType := []byte{buf[3]}
-
-	header.magicNumber = binary.BigEndian.Uint16(slMagicNumber)
-	//header.version = binary.BigEndian.Int8(slVersion)
-	//header.packetType = binary.BigEndian.Uint8(slPackeType)
-}
-*/
 // преобразует массив данных в представление пакета
-func (header *PacketHeader) ParseData(buf []byte) {
-	fmt.Printf("PARSE DATA size=%d\n", len(buf))
+func (header *PacketHeader) parseData(buf []byte) {
 	var slMagic = []byte{buf[0], buf[1]}
 	var slVersion = []byte{0, buf[2]}
 	var slPacketType = []byte{0, buf[3]}
@@ -67,4 +50,10 @@ func (header *PacketHeader) ParseData(buf []byte) {
 	header.SetMagicNumber(magicNumber)
 	header.SetProtocolVersion(uint8(packetVersion))
 	header.SetPacketType(uint8(packetType))
+}
+
+// метод реализует парсинг бинарного пакета в соответствующие загловки
+func (header *PacketHeader) ParseBinaryData(data []byte) bool {
+	header.parseData(data)
+	return true
 }

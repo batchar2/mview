@@ -1,8 +1,8 @@
 package testclient
 
 import (
-	"bytes"
-	"encoding/binary"
+	//"bytes"
+	//"encoding/binary"
 	"fmt"
 	"net"
 	"octopus/conf"
@@ -10,38 +10,34 @@ import (
 )
 
 func SendPackets() {
-	var chanelPacket = netpackets.ChanelPacketHeader{}
 	// Формирую пакет авторизации
 	var authPacket = netpackets.TransportAuthKeyPacketHeader{}
 	authPacket.SetMagicNumber(conf.MAGIC_NUMBER)
 	authPacket.SetPacketType(conf.TRANSPORT_AUTH_PACKET_TYPE_PUBLICKEY_СLIENT2SERVER_SEND)
 
-	var authPacketBuff = &bytes.Buffer{}
-	binary.Write(authPacketBuff, binary.BigEndian, authPacket)
-	fmt.Println(authPacketBuff.Bytes())
+	//fmt.Println(authPacket.Binary().Bytes()[:])
 
 	// Формирую сетевой пакет
 	var netPacket = netpackets.NetworkPacketHeader{}
-	netPacket.SetBody(authPacketBuff.Bytes())
+
 	netPacket.SetPacketType(conf.NETWORK_PACKET_TYPE_AUTH)
 	netPacket.SetMagicNumber(conf.MAGIC_NUMBER)
-	var netPacketBuff = &bytes.Buffer{}
-	binary.Write(netPacketBuff, binary.BigEndian, netPacket)
-
-	fmt.Println(netPacketBuff.Bytes())
+	netPacket.SetBody(authPacket.Binary())
 
 	//Формирую канальный пакет
-	chanelPacket.SetMagicNumber(conf.MAGIC_NUMBER)
-	chanelPacket.SetBody(netPacketBuff.Bytes())
-	buf := &bytes.Buffer{}
-	binary.Write(buf, binary.BigEndian, chanelPacket)
+	var chanelPacket = netpackets.ChanelPacketHeader{}
 
-	fmt.Println(buf.Bytes())
+	chanelPacket.SetMagicNumber(conf.MAGIC_NUMBER)
+	chanelPacket.SetBody(netPacket.Binary())
+	chanelPacket.SetPacketType(conf.CHANEL_PACKET_TYPE_NOT_SECURE)
+
+	//fmt.Println(chanelPacket.Binary().Bytes())
 
 	conn, _ := net.Dial("tcp", "127.0.0.1:60001")
 
-	conn.Write(buf.Bytes())
+	var length = len(chanelPacket.Binary())
 
-	fmt.Println("Send data")
-	//}
+	fmt.Println(length)
+
+	conn.Write(chanelPacket.Binary())
 }

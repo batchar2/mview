@@ -1,6 +1,8 @@
 package netpackets
 
 import (
+	"bytes"
+	"encoding/binary"
 	"octopus/conf"
 )
 
@@ -20,6 +22,25 @@ type TransportAuthKeyPacketHeader struct {
 	key [conf.TRANSPORT_AUTH_KEY_SIZE]byte
 	//  поле, которое не используется
 	tmp_body [conf.TRANSPORT_AUTH_BASE_PACKET_BODY_SIZE - 4 - conf.TRANSPORT_AUTH_KEY_SIZE]byte
+}
+
+func (header *TransportAuthKeyPacketHeader) ParseBinaryData(data []byte) bool {
+
+	header.parseData(data)
+	var slKeyLength = data[4:8]
+	header.keyLength = binary.BigEndian.Uint32(slKeyLength)
+	if header.keyLength > 0 && header.keyLength < conf.TRANSPORT_AUTH_KEY_SIZE {
+		copy(header.key[:], data[8:header.keyLength])
+		return true
+	}
+	return false
+}
+
+// переводит пакет в бинарное представление
+func (header *TransportAuthKeyPacketHeader) Binary() []byte {
+	var authPacketBuff = &bytes.Buffer{}
+	binary.Write(authPacketBuff, binary.BigEndian, *header)
+	return authPacketBuff.Bytes()[:]
 }
 
 // Конкретный тип данных - отправка данных пользователя

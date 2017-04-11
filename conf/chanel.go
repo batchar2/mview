@@ -12,4 +12,6 @@ const (
 	CHANEL_PACKET_TYPE_SECURE_SIMMETRIC_KEY uint8 = 2
 	// пакет не зашифрован (применяется только при обмене ключами)
 	CHANEL_PACKET_TYPE_NOT_SECURE uint8 = 3
+	// Пакет строится при ошибочном запросе
+	CHANEL_PACKET_TYPE_ERROR_REQUEST uint8 = 4
 )
