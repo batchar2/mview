@@ -1,12 +1,14 @@
+// Пакет отвечает за обработку принятых пакетов от пользователя и генерацию ответа
+
 package request
 
 import (
 	"fmt"
 	"octopus/conf"
-	"octopus/request/flyweight"
-	"octopus/request/processing/chanel"
-	"octopus/request/processing/network"
-	"octopus/request/processing/transport/auth"
+	"octopus/packproc/request/actions/chanel"
+	"octopus/packproc/request/actions/network"
+	"octopus/packproc/request/actions/transport/auth"
+	"octopus/packproc/request/flyweight"
 )
 
 type Request struct {
@@ -52,25 +54,26 @@ func (self *Request) Init() {
 	self.initTransportProcessing()
 }
 
-// Запуск процесса идентификации и обработки пакета
-func (self *Request) Processing(data []byte, packetType uint8) {
+// Запуск процесса идентификации и обработки пакета: возвращает бинарное представление пакета верхнего уровня (транспортного) и номер команды
+func (self *Request) Processing(data []byte, packetType uint8) ([]byte, uint8) {
 
 	// Обрабатываем данные сететвого уровня
 	var chanelAction = worker(&self.chanelProcessing, data, packetType)
 	if chanelAction == nil {
-		return
+		return nil, 0
 	}
 	// Обрабатываем данные сетевого уровня
 	var networkAction = worker(&self.networkProcessing, chanelAction.GetBodyBinaryData(), chanelAction.GetData2PacketHeader().GetPacketType())
 	if networkAction == nil {
-		return
+		return nil, 0
 	}
 	// Обрабатываем данные транспортного уровня
 	var transportAction = worker(&self.transportProcessing, networkAction.GetBodyBinaryData(), networkAction.GetData2PacketHeader().GetPacketType())
 	if transportAction == nil {
-		return
+		return nil, 0
 	}
 
+	return transportAction.BinaryData(), transportAction.GetData2PacketHeader().GetPacketType()
 }
 
 // обрабтка данных: поиск оработчика и контроль за получением результата

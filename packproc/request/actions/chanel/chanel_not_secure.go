@@ -5,7 +5,7 @@ package chanel
 import (
 	"fmt"
 	"octopus/netpackets"
-	"octopus/request/flyweight"
+	"octopus/packproc/request/flyweight"
 )
 
 type ChanelNotSecureProcessing struct {
@@ -44,4 +44,8 @@ func (self *ChanelNotSecureProcessing) GetData2PacketHeader() *netpackets.Packet
 
 func (self *ChanelNotSecureProcessing) GetBodyBinaryData() []byte {
 	return self.packet.GetBody()
+}
+
+func (self *ChanelNotSecureProcessing) BinaryData() []byte {
+	return nil
 }

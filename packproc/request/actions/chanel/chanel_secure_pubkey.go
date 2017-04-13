@@ -3,7 +3,7 @@ package chanel
 
 import (
 	"octopus/netpackets"
-	"octopus/request/flyweight"
+	"octopus/packproc/request/flyweight"
 )
 
 // Реализует обработку  и приведение типов пакетов канального уровня
@@ -23,5 +23,9 @@ func (self *ChanelSecurePubKeyProcessing) GetData2PacketHeader() *netpackets.Pac
 }
 
 func (self *ChanelSecurePubKeyProcessing) GetBodyBinaryData() []byte {
+	return nil
+}
+
+func (self *ChanelSecurePubKeyProcessing) BinaryData() []byte {
 	return nil
 }

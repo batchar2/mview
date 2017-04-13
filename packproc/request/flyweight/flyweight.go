@@ -14,6 +14,8 @@ type Flyweight interface {
 	GetData2PacketHeader() *netpackets.PacketHeader
 	// Получить данные полезной нагрузки пакета
 	GetBodyBinaryData() []byte
+	// Получить бинарное представление пакета
+	BinaryData() []byte
 }
 
 // Фабрика для создания приспособленцев

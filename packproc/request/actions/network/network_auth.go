@@ -5,7 +5,7 @@ import (
 	//"octopus/conf"
 	"fmt"
 	"octopus/netpackets"
-	"octopus/request/flyweight"
+	"octopus/packproc/request/flyweight"
 )
 
 type NetworkAuthProcessing struct {
@@ -41,4 +41,8 @@ func (self *NetworkAuthProcessing) GetData2PacketHeader() *netpackets.PacketHead
 
 func (self *NetworkAuthProcessing) GetBodyBinaryData() []byte {
 	return self.packet.GetBody()
+}
+
+func (self *NetworkAuthProcessing) BinaryData() []byte {
+	return nil
 }

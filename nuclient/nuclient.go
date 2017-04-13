@@ -7,7 +7,7 @@ import (
 	"net"
 	"octopus/conf"
 	"octopus/netpackets"
-	"octopus/request"
+	"octopus/packproc"
 	//	"time"
 )
 
@@ -33,15 +33,14 @@ func (nuclient *Nuclient) Start() {
 	// Запускаю канал для связи с удаленным клиентом
 	go clientReadData(nuclient.Connect, chanelClientToNuclient, chanelIsConClose)
 
-	// инициализация обработчиков пакетов
-	var requestProcessing = request.Request{}
-	requestProcessing.Init()
+	var packetProcessing = packproc.PacketProcessing{}
+	packetProcessing.Init()
 
 	for {
 		select {
 		// Получены данные от удаленного клиента. Пускаю в обработку
 		case chanelPacket := <-chanelClientToNuclient:
-			go requestProcessing.Processing(chanelPacket.Binary(), chanelPacket.GetPacketType())
+			go packetProcessing.Processing(chanelPacket.Binary(), chanelPacket.GetPacketType())
 		// Получены данные от ядра системы
 		case <-nuclient.ChanelNucleus2Client:
 			fmt.Println("Получены данные от ядра системы")
