@@ -15,8 +15,6 @@ func SendPackets() {
 	authPacket.SetMagicNumber(conf.MAGIC_NUMBER)
 	authPacket.SetPacketType(conf.TRANSPORT_AUTH_PACKET_TYPE_PUBLICKEY_СLIENT2SERVER_SEND)
 
-	//fmt.Println(authPacket.Binary().Bytes()[:])
-
 	// Формирую сетевой пакет
 	var netPacket = netpackets.NetworkPacketHeader{}
 
@@ -31,7 +29,7 @@ func SendPackets() {
 	chanelPacket.SetBody(netPacket.Binary())
 	chanelPacket.SetPacketType(conf.CHANEL_PACKET_TYPE_NOT_SECURE)
 
-	//fmt.Println(chanelPacket.Binary().Bytes())
+	fmt.Println(chanelPacket.Binary())
 
 	conn, _ := net.Dial("tcp", "127.0.0.1:60001")
 

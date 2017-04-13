@@ -4,13 +4,6 @@ import (
 	"octopus/conf"
 )
 
-// неопределеный пакет авторизации. Сначала приводится к этому типу данных, в последствии к конкретному
-type TransportAuthBasePacketHeader struct {
-	PacketHeader
-	// Размер неидентифицированого пакета авторизации
-	body [conf.TRANSPORT_AUTH_BASE_PACKET_BODY_SIZE]byte
-}
-
 // Конкретный тип данных - отправка данных пользователя
 type TransportAuthUserRequestPacketHeader struct {
 	PacketHeader

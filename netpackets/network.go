@@ -24,7 +24,12 @@ func (header *NetworkPacketHeader) GetBody() []byte {
 func (header *NetworkPacketHeader) ParseBinaryData(data []byte) bool {
 	header.parseData(data)
 	header.SetBody(data[4:])
-	return true
+
+	if header.GetMagicNumber() != conf.MAGIC_NUMBER {
+		return true
+	}
+
+	return false
 }
 
 // переводит пакет в бинарное представление
