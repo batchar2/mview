@@ -4,17 +4,17 @@ package auth
 import (
 	"octopus/conf"
 	"octopus/netpackets"
-	"octopus/response/pipeline"
+	"octopus/packproc/response/pipeline"
 )
 
-type NetworkAuthPacketMaker struct {
-	pipeline.ResponseInterface
+type AuthSendPublicKeyPacketMaker struct {
+	pipeline.Response
 
 	packet netpackets.NetworkPacketHeader
 }
 
 // собрать пакет из данных
-func (self *NetworkAuthPacketMaker) MakePacket(data []byte) bool {
+func (self *AuthSendPublicKeyPacketMaker) MakePacket(data []byte) bool {
 	self.packet = netpackets.NetworkPacketHeader{}
 
 	self.packet.SetBody(data)
@@ -25,6 +25,6 @@ func (self *NetworkAuthPacketMaker) MakePacket(data []byte) bool {
 }
 
 // Получить бинарное представление пакета
-func (self *NetworkAuthPacketMaker) GetBinaryPacketData() []byte {
+func (self *AuthSendPublicKeyPacketMaker) GetBinaryPacketData() []byte {
 	return self.packet.Binary()
 }

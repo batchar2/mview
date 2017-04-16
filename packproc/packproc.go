@@ -1,27 +1,9 @@
-// Обрабтчик пакетов
 package packproc
 
-import (
-	"fmt"
-	"octopus/packproc/request"
-)
+// функции обратного вызова
 
-type PacketProcessing struct {
-	requestProcessing request.Request
-}
+type CallbackSetDataAction func(data []byte, length uint32)
+type CallbackGetDataAction func() ([]byte, uint32)
 
-func (self *PacketProcessing) Init() {
-	// Инициализация приемника пакета
-	self.requestProcessing = request.Request{}
-
-	self.requestProcessing.Init()
-
-}
-
-func (self *PacketProcessing) Processing(data []byte, packetType uint8) {
-	//var transportPacketBinaryData =
-	var transportBinaryPacket, transportPacketType = self.requestProcessing.Processing(data, packetType)
-
-	fmt.Println(transportPacketType)
-	fmt.Println(transportBinaryPacket)
-}
+// Выполнить операцию с данными
+type CallbackProcessingData func(data []byte, length uint32) ([]byte, uint32)

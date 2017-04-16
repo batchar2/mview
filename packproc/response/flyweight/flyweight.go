@@ -1,7 +1,7 @@
-package response
+package flyweight
 
 import (
-	"octopus/response/pipeline"
+	"octopus/packproc/response/pipeline"
 )
 
 // Фабрика для создания приспособленцев

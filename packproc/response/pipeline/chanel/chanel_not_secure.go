@@ -4,11 +4,11 @@ package chanel
 import (
 	"octopus/conf"
 	"octopus/netpackets"
-	"octopus/response/pipeline"
+	"octopus/packproc/response/pipeline"
 )
 
 type ChanelNotSecurePacketMaker struct {
-	pipeline.ResponseInterface
+	pipeline.Response
 
 	packet netpackets.ChanelPacketHeader
 }

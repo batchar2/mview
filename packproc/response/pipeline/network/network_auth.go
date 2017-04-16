@@ -4,11 +4,11 @@ package network
 import (
 	"octopus/conf"
 	"octopus/netpackets"
-	"octopus/response/pipeline"
+	"octopus/packproc/response/pipeline"
 )
 
 type NetworkAuthPacketMaker struct {
-	pipeline.ResponseInterface
+	pipeline.Response
 
 	packet netpackets.NetworkPacketHeader
 }

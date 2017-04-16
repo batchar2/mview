@@ -7,7 +7,7 @@ import (
 	"net"
 	"octopus/conf"
 	"octopus/netpackets"
-	"octopus/packproc"
+	"octopus/nuclient/processing"
 	//	"time"
 )
 
@@ -23,17 +23,21 @@ type Nuclient struct {
 }
 
 // Реализация взаимодействия между ядром системы и удаленым клиентом
-func (nuclient *Nuclient) Start() {
-	defer nuclient.Connect.Close()
+func (self *Nuclient) Start() {
+	defer self.Connect.Close()
 
 	// канал для связи горутины, чтения данных, от клиента до нуклиента
 	var chanelClientToNuclient = make(chan netpackets.ChanelPacketHeader, 100)
 	// Канал извещает нулиента о завершении работы приложения
 	var chanelIsConClose = make(chan bool)
 	// Запускаю канал для связи с удаленным клиентом
-	go clientReadData(nuclient.Connect, chanelClientToNuclient, chanelIsConClose)
+	go clientReadData(self.Connect, chanelClientToNuclient, chanelIsConClose)
 
-	var packetProcessing = packproc.PacketProcessing{}
+	var packetProcessing = processing.PacketProcessing{
+		SaveSessionKey:      self.SaveSessionKey,
+		SaveClientPublicKey: self.SaveClientPublicKey,
+		SendDataClient:      self.SendDataClient}
+	//var packetProcessing = packproc.PacketProcessing{}
 	packetProcessing.Init()
 
 	for {
@@ -42,7 +46,7 @@ func (nuclient *Nuclient) Start() {
 		case chanelPacket := <-chanelClientToNuclient:
 			go packetProcessing.Processing(chanelPacket.Binary(), chanelPacket.GetPacketType())
 		// Получены данные от ядра системы
-		case <-nuclient.ChanelNucleus2Client:
+		case <-self.ChanelNucleus2Client:
 			fmt.Println("Получены данные от ядра системы")
 		// информировнаие о закрытии соединения с удаленным клиентом
 		case <-chanelIsConClose:
@@ -55,6 +59,17 @@ func (nuclient *Nuclient) Start() {
 			*/
 		}
 	}
+}
+
+func (self *Nuclient) SaveSessionKey(data []byte, length uint32) {
+}
+
+func (self *Nuclient) SaveClientPublicKey(data []byte, length uint32) {
+	fmt.Println("SAVE PUBLIC KEY")
+}
+
+func (self *Nuclient) SendDataClient(data []byte, length uint32) {
+
 }
 
 // Читаем данные из сокета

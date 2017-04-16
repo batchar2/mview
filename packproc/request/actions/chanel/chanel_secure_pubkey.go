@@ -6,12 +6,17 @@ import (
 	"octopus/packproc/request/flyweight"
 )
 
+// Выполнить операцию с данными
+type CallbackProcessingData func(data []byte, length int) ([]byte, int)
+
 // Реализует обработку  и приведение типов пакетов канального уровня
 // Предварительно расшифровав зашифрованый текст
 type ChanelSecurePubKeyProcessing struct {
 	flyweight.Flyweight
 
 	packet netpackets.PacketHeader
+
+	EncryptAction CallbackProcessingData
 }
 
 func (self *ChanelSecurePubKeyProcessing) Processing(data []byte) bool {

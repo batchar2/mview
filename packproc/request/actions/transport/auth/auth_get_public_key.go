@@ -4,6 +4,7 @@ package auth
 import (
 	"fmt"
 	"octopus/netpackets"
+	"octopus/packproc"
 	"octopus/packproc/request/flyweight"
 )
 
@@ -13,6 +14,8 @@ type AuthGetPublicKeyProcessing struct {
 	packet netpackets.TransportAuthKeyPacketHeader
 
 	header netpackets.PacketHeader
+	// Сохранить публичный ключ клиента
+	SaveClientPublicKeyAction packproc.CallbackSetDataAction
 }
 
 func (self *AuthGetPublicKeyProcessing) Processing(data []byte) bool {
@@ -26,6 +29,8 @@ func (self *AuthGetPublicKeyProcessing) Processing(data []byte) bool {
 	self.header = netpackets.PacketHeader{}
 	self.header.SetMagicNumber(self.packet.GetMagicNumber())
 	self.header.SetPacketType(self.packet.GetPacketType())
+
+	self.SaveClientPublicKeyAction(self.packet.GetKey(), self.packet.GetKeyLenght())
 
 	return false
 }
