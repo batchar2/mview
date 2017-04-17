@@ -2,13 +2,15 @@
 package auth
 
 import (
+	//"bytes"
+	"fmt"
 	"octopus/conf"
 	"octopus/netpackets"
-	"octopus/packproc/response/pipeline"
+	//"octopus/packproc/response/pipeline"
 )
 
 type AuthSendPublicKeyPacketMaker struct {
-	pipeline.Response
+	//pipeline.ResponsePacket
 
 	packet netpackets.NetworkPacketHeader
 }
@@ -20,6 +22,8 @@ func (self *AuthSendPublicKeyPacketMaker) MakePacket(data []byte) bool {
 	self.packet.SetBody(data)
 	self.packet.SetMagicNumber(conf.MAGIC_NUMBER)
 	self.packet.SetPacketType(conf.NETWORK_PACKET_TYPE_AUTH)
+
+	fmt.Println("AuthSendPublicKeyPacketMaker")
 
 	return false
 }

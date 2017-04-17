@@ -9,7 +9,8 @@ import (
 // Описываю функции обратного вызова
 type PacketProcessing struct {
 	// Объекты ответственные за прием запроса и генерацию ответа
-	requestProcessing RequestProcessing
+	requestProcessing  RequestProcessing
+	responseProcessing ResponseProcessing
 	// Описываю функции обратного вызова
 	SaveSessionKey      packproc.CallbackSetDataAction
 	SaveClientPublicKey packproc.CallbackSetDataAction
@@ -44,6 +45,8 @@ func (self *PacketProcessing) Init() {
 func (self *PacketProcessing) Processing(data []byte, packetType uint8) {
 	//var transportPacketBinaryData =
 	var transportBinaryPacket, transportPacketType = self.requestProcessing.Processing(data, packetType)
+
+	self.responseProcessing.Processing(transportBinaryPacket, packetType)
 
 	fmt.Println(transportPacketType)
 	fmt.Println(transportBinaryPacket)
