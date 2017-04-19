@@ -39,14 +39,8 @@ type PipelineResponse struct {
 
 // Добавляет обработчик в цепочку
 func (self *PipelineResponse) AddItem(item ResponsePacket) {
-
-	if self.pipeline == nil {
-		//self.pipeline = make(ResponsePacket)
-		//map[uint8]*pipeline.PipelineResponse
-	}
 	self.pipeline = append(self.pipeline, item) // PushBack(item)
 
-	fmt.Println("!!!!!!!!!!!!!! - AddItem")
 	fmt.Println(len(self.pipeline))
 }
 
@@ -61,8 +55,8 @@ func (self *PipelineResponse) Run(data []byte) {
 			item.MakePacket(dataPacket)
 		}
 		dataPacket = item.GetBinaryPacketData()
-		fmt.Println("----")
-		fmt.Println(i)
-		fmt.Println(dataPacket)
+		//fmt.Println("----")
+		//fmt.Println(i)
+		//fmt.Println(dataPacket)
 	}
 }

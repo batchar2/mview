@@ -56,8 +56,12 @@ func (self *RequestProcessing) initTransportProcessing() {
 	var AuthGetPublicKey = auth.AuthGetPublicKeyProcessing{
 		SaveClientPublicKeyAction: self.SaveClientPublicKey}
 
+	var AuthGetSessionKey = auth.AuthGetSessionKeyProcessing{
+		SaveSessionKey: self.SaveSessionKey}
+
 	self.transportProcessing = flyweight.FlyweightFactory{}
 	self.transportProcessing.SetFlyweight(conf.TRANSPORT_AUTH_PACKET_TYPE_PUBLICKEY_СLIENT2SERVER_SEND, &AuthGetPublicKey)
+	self.transportProcessing.SetFlyweight(conf.TRANSPORT_AUTH_PACKET_TYPE_SESSION_PRIVATE_KEY, &AuthGetSessionKey)
 }
 
 // Инициализация обработчиков
@@ -93,8 +97,6 @@ func (self *RequestProcessing) Processing(data []byte, packetType uint8) ([]byte
 
 // обрабтка данных: поиск оработчика и контроль за получением результата
 func worker(factory *flyweight.FlyweightFactory, data []byte, packetType uint8) flyweight.Flyweight {
-	//fmt.Printf("PACKET_TYPE_WORKER = %d\n", packetType)
-	//fmt.Println(data)
 	var action = factory.GetFlyweight(packetType)
 	if action != nil {
 		if err := action.Processing(data); err {
