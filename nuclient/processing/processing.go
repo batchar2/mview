@@ -2,7 +2,7 @@
 package processing
 
 import (
-	"fmt"
+	//"fmt"
 	"octopus/packproc"
 )
 
@@ -40,14 +40,21 @@ func (self *PacketProcessing) Init() {
 
 	self.requestProcessing.Init()
 
+	self.responseProcessing = ResponseProcessing{
+		EncryptSessionKey:      self.EncryptSessionKey,
+		EncryptCleintPublicKey: self.EncryptCleintPublicKey,
+		SendDataClient:         self.SendDataClient,
+		SendDataNucleus:        self.SendDataNucleus}
+
+	self.responseProcessing.Init()
 }
 
 func (self *PacketProcessing) Processing(data []byte, packetType uint8) {
 	//var transportPacketBinaryData =
 	var transportBinaryPacket, transportPacketType = self.requestProcessing.Processing(data, packetType)
 
-	self.responseProcessing.Processing(transportBinaryPacket, packetType)
+	self.responseProcessing.Processing(transportBinaryPacket, transportPacketType)
 
-	fmt.Println(transportPacketType)
-	fmt.Println(transportBinaryPacket)
+	//fmt.Println(transportPacketType)
+	//fmt.Println(transportBinaryPacket)
 }

@@ -2,7 +2,9 @@
 package processing
 
 import (
+	//"fmt"
 	"octopus/conf"
+	"octopus/packproc"
 	"octopus/packproc/response/flyweight"
 	"octopus/packproc/response/pipeline"
 	"octopus/packproc/response/pipeline/chanel"
@@ -13,6 +15,13 @@ import (
 type ResponseProcessing struct {
 	// цепочки объязаностей через приспособленца
 	pipelines flyweight.FlyweightFactory
+	// Кодировать сессионым ключем данные
+	EncryptSessionKey packproc.CallbackProcessingData
+	// Зашифровать открытым ключем клиента
+	EncryptCleintPublicKey packproc.CallbackProcessingData
+	// отпраука данных
+	SendDataClient  packproc.CallbackSetDataAction
+	SendDataNucleus packproc.CallbackSetDataAction
 }
 
 func (self *ResponseProcessing) Init() {
@@ -23,7 +32,8 @@ func (self *ResponseProcessing) Init() {
 	var pipelinePublicKey = pipeline.PipelineResponse{}
 	var authSendPublicKey = auth.AuthSendPublicKeyPacketMaker{}
 	var networkAuthPacketMaker = network.NetworkAuthPacketMaker{}
-	var chanelPacketMaker = chanel.ChanelNotSecurePacketMaker{}
+	var chanelPacketMaker = chanel.ChanelNotSecurePacketMaker{
+		SendDataClient: self.SendDataClient}
 
 	pipelinePublicKey.AddItem(&authSendPublicKey)
 	pipelinePublicKey.AddItem(&networkAuthPacketMaker)
@@ -34,5 +44,7 @@ func (self *ResponseProcessing) Init() {
 
 func (self *ResponseProcessing) Processing(data []byte, packetType uint8) {
 	var pipeline = self.pipelines.GetFlyweight(packetType)
-	pipeline.Run(data)
+	if pipeline != nil {
+		pipeline.Run(data)
+	}
 }

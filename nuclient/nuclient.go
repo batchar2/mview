@@ -69,7 +69,9 @@ func (self *Nuclient) SaveClientPublicKey(data []byte, length uint32) {
 }
 
 func (self *Nuclient) SendDataClient(data []byte, length uint32) {
-
+	//fmt.Println("+++ SendDataClient")
+	//fmt.Println(data)
+	self.Connect.Write(data)
 }
 
 // Читаем данные из сокета

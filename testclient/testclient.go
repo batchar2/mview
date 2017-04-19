@@ -38,4 +38,9 @@ func SendPackets() {
 	fmt.Println(length)
 
 	conn.Write(chanelPacket.Binary())
+
+	var buf = make([]byte, conf.PACKET_SIZE)
+	conn.Read(buf)
+	fmt.Println("---------")
+	fmt.Println(buf)
 }

@@ -19,39 +19,39 @@ type TransportAuthKeyPacketHeader struct {
 	tmp_body [conf.TRANSPORT_AUTH_BASE_PACKET_BODY_SIZE - 4 - conf.TRANSPORT_AUTH_KEY_SIZE]byte
 }
 
-func (header *TransportAuthKeyPacketHeader) ParseBinaryData(data []byte) bool {
+func (self *TransportAuthKeyPacketHeader) ParseBinaryData(data []byte) bool {
 
-	header.parseData(data)
+	self.parseData(data)
 	var slKeyLength = data[4:8]
 
 	var keyLength = binary.BigEndian.Uint32(slKeyLength)
-	header.SetKeyLength(keyLength)
-	if header.keyLength > 0 && header.keyLength < conf.TRANSPORT_AUTH_KEY_SIZE {
-		header.SetKey(data[8:header.keyLength])
+	self.SetKeyLength(keyLength)
+	if self.keyLength > 0 && self.keyLength < conf.TRANSPORT_AUTH_KEY_SIZE {
+		self.SetKey(data[8:self.keyLength])
 		return true
 	}
 	return false
 }
 
 // переводит пакет в бинарное представление
-func (header *TransportAuthKeyPacketHeader) Binary() []byte {
+func (self *TransportAuthKeyPacketHeader) Binary() []byte {
 	var authPacketBuff = &bytes.Buffer{}
-	binary.Write(authPacketBuff, binary.BigEndian, *header)
+	binary.Write(authPacketBuff, binary.BigEndian, *self)
 	return authPacketBuff.Bytes()[:]
 }
 
-func (header *TransportAuthKeyPacketHeader) SetKey(data []byte) {
-	copy(header.key[:], data)
+func (self *TransportAuthKeyPacketHeader) SetKey(data []byte) {
+	copy(self.key[:], data)
 }
 
-func (header *TransportAuthKeyPacketHeader) GetKey() []byte {
-	return header.key[:]
+func (self *TransportAuthKeyPacketHeader) GetKey() []byte {
+	return self.key[:]
 }
 
-func (header *TransportAuthKeyPacketHeader) SetKeyLength(length uint32) {
-	header.keyLength = length
+func (self *TransportAuthKeyPacketHeader) SetKeyLength(length uint32) {
+	self.keyLength = length
 }
 
-func (header *TransportAuthKeyPacketHeader) GetKeyLenght() uint32 {
-	return header.keyLength
+func (self *TransportAuthKeyPacketHeader) GetKeyLenght() uint32 {
+	return self.keyLength
 }

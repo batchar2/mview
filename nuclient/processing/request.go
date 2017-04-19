@@ -94,7 +94,7 @@ func (self *RequestProcessing) Processing(data []byte, packetType uint8) ([]byte
 // обрабтка данных: поиск оработчика и контроль за получением результата
 func worker(factory *flyweight.FlyweightFactory, data []byte, packetType uint8) flyweight.Flyweight {
 	//fmt.Printf("PACKET_TYPE_WORKER = %d\n", packetType)
-	fmt.Println(data)
+	//fmt.Println(data)
 	var action = factory.GetFlyweight(packetType)
 	if action != nil {
 		if err := action.Processing(data); err {

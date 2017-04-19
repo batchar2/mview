@@ -12,16 +12,16 @@ import (
 type AuthSendPublicKeyPacketMaker struct {
 	//pipeline.ResponsePacket
 
-	packet netpackets.NetworkPacketHeader
+	packet netpackets.TransportAuthKeyPacketHeader
 }
 
 // собрать пакет из данных
 func (self *AuthSendPublicKeyPacketMaker) MakePacket(data []byte) bool {
-	self.packet = netpackets.NetworkPacketHeader{}
+	self.packet = netpackets.TransportAuthKeyPacketHeader{}
 
-	self.packet.SetBody(data)
+	//self.packet.SetBody(data)
 	self.packet.SetMagicNumber(conf.MAGIC_NUMBER)
-	self.packet.SetPacketType(conf.NETWORK_PACKET_TYPE_AUTH)
+	self.packet.SetPacketType(conf.TRANSPORT_AUTH_PACKET_TYPE_PUBLIC_KEY_SERVER2CLIENT_SEND)
 
 	fmt.Println("AuthSendPublicKeyPacketMaker")
 
